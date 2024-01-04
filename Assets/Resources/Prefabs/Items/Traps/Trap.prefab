@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3466667000637119630}
   - component: {fileID: 3466667000637119665}
   - component: {fileID: 3466667000637119664}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Trap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 3466667000637119667}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.05, z: 0}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 2, y: 0.1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -50,6 +50,7 @@ MonoBehaviour:
   <rend>k__BackingField: {fileID: 3466667000637119665}
   <holoMat>k__BackingField: {fileID: 2100000, guid: 31c69e1474ec19647b1bc38c8e45c875,
     type: 2}
+  <moneyCost>k__BackingField: 10
   <isPlaced>k__BackingField: 0
 --- !u!33 &3466667000637119630
 MeshFilter:

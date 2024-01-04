@@ -7,13 +7,14 @@ public class TrapPlacer : MonoBehaviour {
 
     [field: Header("Autoattach Settings")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private Camera cam { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] private PlayerManager playerManager { get; set; }
 
     [field: Header("Trap Placer Settings")]
     // LayerMask para los obstaculos y otras trampas (6 = Obstacle y 7 = Trap)
     [field: SerializeField, ReadOnlyField] private LayerMask blockLayer { get; set; } = 1 << 6 | 1 << 7;
     [field: SerializeField, ReadOnlyField] private KeyCode enterTrapModeKey { get; set; } = KeyCode.T;
     [field: SerializeField, ReadOnlyField] private KeyCode placeTrapKey { get; set; } = KeyCode.Space;
-    [field: SerializeField] private GameObject trapPrefab { get; set; }
+    [field: SerializeField] private Trap trapPrefab { get; set; }
     [field: SerializeField] private float rayLength { get; set; } = 2f;
 
     private Trap tempTrap { get; set; }
@@ -44,9 +45,9 @@ public class TrapPlacer : MonoBehaviour {
         {
             //Si NO existe la trampla placeholder, la instancia para entrar al modo de colocar trampa y poder ver donde se colocara
             case true:
-                tempTrap = Instantiate(trapPrefab, trapPrefab.transform.position, Quaternion.identity).GetComponent<Trap>();
+                tempTrap = Instantiate(trapPrefab, trapPrefab.transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
                 break;
-            //Si SI existe la trampla placeholder, la destruye para salir del demodo colocar trampa
+            //Si SI existe la trampla placeholder, la destruye para salir del modo colocar trampa
             case false:
                 Destroy(tempTrap.gameObject);
                 break;
@@ -57,11 +58,26 @@ public class TrapPlacer : MonoBehaviour {
         //Marcamos la trampa como colocada si no lo estaba aun
         if (tempTrap.IsPlaced == false) {
             tempTrap.Place();
+            playerManager.ChangeMoney(-tempTrap.MoneyCost);
+        }
+    }
+
+    bool CanPlaceMoneyTrap() {
+        if (playerManager.Money >= tempTrap.MoneyCost) {
+            tempTrap.SetHoloMatColor(Color.green);
+            return true;
+        }
+        else {
+            tempTrap.SetHoloMatColor(Color.grey);
+            return false;
         }
     }
 
     //Comprueba con un CheckBox del mismo tamaño que la trampa si hay algun obstaculo u otra trampa colocada en la posicion donde queremos crear una trampa
     bool CanPlaceGroundTrap() {
+        if (!CanPlaceMoneyTrap())
+            return false;
+
         //Si hay algun obstaculo o trampa, pone el material de la trampa placeholder en rojo y devuelve false
         if (Physics.CheckBox(GetRoundedCenterGroundPos(tempTrap.transform.position.y), tempTrap.transform.localScale / 2.01f, tempTrap.transform.rotation, blockLayer)) {
             tempTrap.SetHoloMatColor(Color.red);

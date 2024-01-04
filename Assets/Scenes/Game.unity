@@ -998,14 +998,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <cam>k__BackingField: {fileID: 1687258584}
+  <playerManager>k__BackingField: {fileID: 326827033}
   <blockLayer>k__BackingField:
     serializedVersion: 2
     m_Bits: 192
   <enterTrapModeKey>k__BackingField: 116
   <placeTrapKey>k__BackingField: 32
-  <trapPrefab>k__BackingField: {fileID: 3466667000637119667, guid: 18a1c09838ed0d14d8abe9e6c71f5116,
+  <trapPrefab>k__BackingField: {fileID: 1506146290, guid: 18a1c09838ed0d14d8abe9e6c71f5116,
     type: 3}
-  <rayLength>k__BackingField: 2
+  <rayLength>k__BackingField: 8
 --- !u!114 &326827033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1020,7 +1021,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <maxHealth>k__BackingField: 100
   <currentHealth>k__BackingField: 100
-  <money>k__BackingField: 0
+  <money>k__BackingField: 10
   <isDead>k__BackingField: 0
 --- !u!1 &339495441
 GameObject:

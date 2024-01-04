@@ -11,6 +11,8 @@ public class Trap : MonoBehaviour {
     [field: Header("Trap Settings")]
     [field: SerializeField] private Material holoMat { get; set; } //El material que debe tener la trampa cuando esta en modo placeholder
     private Material initialMat { get; set; }
+    [field: SerializeField] private int moneyCost { get; set; } = 10;
+    public int MoneyCost { get { return moneyCost; } }
 
 
     [field: Header("Debug")]

@@ -11,6 +11,7 @@ public class PlayerManager : MonoBehaviour {
 	[field: SerializeField] private int maxHealth { get; set; } = 100;
 	[field: SerializeField] private int currentHealth { get; set; } = 100;
 	[field: SerializeField] private int money { get; set; } = 0;
+    public int Money { get { return money; } }
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private bool isDead { get; set; }
@@ -32,7 +33,7 @@ public class PlayerManager : MonoBehaviour {
         isDead = true;
     }
 
-    public void AddMoney(int amount) {
+    public void ChangeMoney(int amount) {
         money += amount;
     }
 }
