@@ -24,6 +24,12 @@ public class Player : MonoBehaviour {
 
     private CharacterController controller;
 
+    void OnValidate() {
+        if (shootTimer <= 0f) {
+            shootTimer = .1f;
+        }
+    }
+
     void Start() {
         TryGetComponent(out controller);
 
@@ -79,11 +85,5 @@ public class Player : MonoBehaviour {
         //El propio proyectil lleva un script que hace que se añada velocity en su transform.forward, por eso rotamos el proyectil
         //para que mire hacia la direccion en la que lo disparamos
         Instantiate(projectilePrefab, _position, _rotation);
-    }
-
-    private void OnValidate() {
-        if (shootTimer <= 0f) {
-            shootTimer = .1f;
-        }
     }
 }
