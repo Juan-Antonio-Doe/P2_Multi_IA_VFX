@@ -9,8 +9,8 @@ public class PlayerManager : MonoBehaviour {
 	//[field: Header("Autottach on Editor properties")]
 
 	[field: Header("Player Settings")]
-	[field: SerializeField] private int maxHealth { get; set; } = 100;
-	[field: SerializeField] private int currentHealth { get; set; } = 100;
+	[field: SerializeField] private float maxHealth { get; set; } = 100;
+	[field: SerializeField] private float currentHealth { get; set; } = 100;
 	[field: SerializeField] private int money { get; set; } = 0;
     public int Money { get { return money; } }
 
@@ -48,7 +48,7 @@ public class PlayerManager : MonoBehaviour {
         transform.position = new Vector3(transform.position.x, 0, transform.position.z);
     }
 
-    public void TakeDamage(int damage) {
+    public void TakeDamage(float damage) {
         if (currentHealth > 0) {
             currentHealth -= damage;
             if (currentHealth <= 0) {
@@ -102,7 +102,7 @@ public class PlayerManager : MonoBehaviour {
 
     private void OnTriggerStay(Collider other) {
         if (other.CompareTag("Spear")) {
-            TakeDamage(1);
+            TakeDamage(2f * Time.deltaTime);
         }
     }
 }

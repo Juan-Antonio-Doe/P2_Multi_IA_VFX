@@ -12,6 +12,7 @@ public class EnemyAttackingPlayerState : EnemyState {
         agent.speed = enemy.MoveSpeed * 1.5f;
         defaultStoppingDistance = agent.stoppingDistance;
         agent.stoppingDistance = 1f;
+        agent.autoBraking = true;
     }
 
     public override void Enter() {
@@ -39,6 +40,7 @@ public class EnemyAttackingPlayerState : EnemyState {
         agent.ResetPath();
         agent.stoppingDistance = defaultStoppingDistance;
         enemy.AttackCooldown = defaultAttackCooldown;
+        agent.autoBraking = false;
 
         base.Exit();
     }

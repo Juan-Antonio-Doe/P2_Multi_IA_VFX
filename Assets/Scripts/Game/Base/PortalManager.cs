@@ -43,12 +43,13 @@ public class PortalManager : MonoBehaviour {
     void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Enemy")) {
             TakeDamage(damageReceivedByEnemy);
+            other.gameObject.SetActive(false);
             //other.GetComponent<Enemy>().Respawn();
         }
     }
 
     void UpdateHealthUI() {
-        healthBar.fillAmount = health / maxHealth;
+        healthBar.fillAmount = (float) health / maxHealth;
         healthText.text = $"{health}/{maxHealth}";
     }
 }
