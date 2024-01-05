@@ -6,5 +6,5 @@ using UnityEngine;
 public class Enemy : MonoBehaviour {
 
 	[field: Header("Autoattach properties")]
-	[field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemyManager enemyManager { get; set; }
+	[field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemiesManager enemyManager { get; set; }
 }

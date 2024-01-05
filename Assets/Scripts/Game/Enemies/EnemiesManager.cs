@@ -6,11 +6,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyManager : MonoBehaviour {
+public class EnemiesManager : MonoBehaviour {
 
     [field: Header("Autoattach properties")]
-    [field: SerializeField, FindObjectOfType, ReadOnlyField] private PlayerManager player { get; set; }
-    public PlayerManager Player { get => player; }
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private LevelManager levelManager { get; set; }
     [field: SerializeField, ReadOnlyField] private List<Transform> allSpawnPoints { get; set; } = new List<Transform>();
     [field: SerializeField] private bool revalidateProperties { get; set; }

@@ -3,12 +3,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour {
 
     [field: Header("AutoAttach on Editor properties")]
     [field: SerializeField, GetComponent, ReadOnlyField] private LevelTimer levelTimer { get; set; }    // Manages the level timer.
     //[field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemyManager enemyManager { get; set; }    // Manages the enemies
+
+    [field: Header("--- UI settings ---")]
+    [field: SerializeField] private Text waveText { get; set; }
 
     [field: Header("--- Level manager properties ---")]
     [field: SerializeField] private float enemyWaveDurationMins { get; set; } = 8f;
@@ -82,6 +86,7 @@ public class LevelManager : MonoBehaviour {
         isWaveActive = true;
         currentTimeElapsed = 0f;
         currentWave++;
+        waveText.text = currentWave.ToString();
 
         //Debug.Log($"Wave <color=red>{currentWave}</color> started.");
 
@@ -110,8 +115,8 @@ public class LevelManager : MonoBehaviour {
             // Show text on the center of the screen.
             GUI.Label(new Rect(width - 250, height - 25, 1000, 1000),
                 $"Máximo de juegadores: <color=green>3</color>\n" +
-                $" - Pulse <b>Enter</b> para empezar la partida.\n" +
-                $" - Pulse <b>F4</b> para salir.");
+                $" - Pulse <b><color=clear>Enter</color></b> para empezar la partida.\n" +
+                $" - Pulse <b><color=clear>F4</color></b> para salir.");
         }
     }
 }
