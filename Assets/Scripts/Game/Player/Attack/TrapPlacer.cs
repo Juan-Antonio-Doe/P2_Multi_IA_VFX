@@ -20,6 +20,9 @@ public class TrapPlacer : MonoBehaviour {
     private Trap tempTrap { get; set; }
 
     void Update() {
+        if (!LevelManager.isStarted)
+            return;
+
         //Cambiamos al modo de colocar trampas
         if (Input.GetKeyDown(enterTrapModeKey)) {
             TryPlaceTrap();

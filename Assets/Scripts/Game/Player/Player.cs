@@ -38,6 +38,9 @@ public class Player : MonoBehaviour {
     }
 
     void Update() {
+        if (!LevelManager.isStarted)
+            return;
+
         MovementAndRotation();
         Shoot();
     }

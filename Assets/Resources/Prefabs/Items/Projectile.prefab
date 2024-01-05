@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 836127155522861247}
+  - component: {fileID: 836127155522861186}
   - component: {fileID: 836127155522861246}
   - component: {fileID: 836127155522861245}
   - component: {fileID: 836127155522861244}
   - component: {fileID: 836127155522861187}
-  - component: {fileID: 836127155522861186}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36,6 +36,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &836127155522861186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 836127155522861185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49f50c3734fa10a45b384e70ecba604d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <rb>k__BackingField: {fileID: 836127155522861187}
+  <speed>k__BackingField: 15
+  <lifeTime>k__BackingField: 5
 --- !u!33 &836127155522861246
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -134,17 +149,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 2
---- !u!114 &836127155522861186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 836127155522861185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49f50c3734fa10a45b384e70ecba604d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <rb>k__BackingField: {fileID: 836127155522861187}
-  <speed>k__BackingField: 5
