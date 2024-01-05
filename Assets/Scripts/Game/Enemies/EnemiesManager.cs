@@ -25,6 +25,8 @@ public class EnemiesManager : MonoBehaviour {
     private float enemyRespawnTimer { get; set; } = 0f;
     [field: SerializeField] private int maxEnemiesPerWave { get; set; } = 10;
     [field: SerializeField] private int increaseEnemiesPerWave { get; set; } = 4;
+
+    [field: Header("Enemies pool")]
     [field: SerializeField, ReadOnlyField] private List<Enemy> allEnemiesDisabled { get; set; } = new List<Enemy>();
 
     [field: Header("Debug")]
@@ -36,7 +38,7 @@ public class EnemiesManager : MonoBehaviour {
         UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
         bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
         bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
-        if (!isValidPrefabStage && prefabConnected) {
+        if (!isValidPrefabStage/* && prefabConnected*/) {
             if (revalidateProperties)
                 ValidateAssings();
         }

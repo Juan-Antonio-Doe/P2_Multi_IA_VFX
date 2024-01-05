@@ -18,15 +18,34 @@ public class PlayerManager : MonoBehaviour {
     [field: SerializeField] private Image healthBar { get; set; }
     [field: SerializeField] private Text healthText { get; set; }
     [field: SerializeField] private Text moneyText { get; set; }
+    [field: SerializeField] private float enemyRayCastDistance { get; set; } = 60f;
+    [field: SerializeField] private LayerMask enemyLayer { get; set; } = 1 << 11;
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private bool isDead { get; set; }
+    public bool IsDead { get { return isDead; } }
+    
+
+    // Definir un evento que se dispara cuando el jugador mira a un enemigo
+    public static event Action<Transform> OnPlayerLookAtEnemy;
+
+    private float centerWidth { get; set; }
+    private float centerHeight { get; set; }
 
     void Start() {
+        centerWidth = Screen.width / 2;
+        centerHeight = Screen.height / 2;
+
         currentHealth = maxHealth;
     }
 
-	public void TakeDamage(int damage) {
+    void Update() {
+        if (!isDead) {
+            CheckEnemyInFront();
+        }
+    }
+
+    public void TakeDamage(int damage) {
         if (currentHealth > 0) {
             currentHealth -= damage;
             if (currentHealth <= 0) {
@@ -56,5 +75,19 @@ public class PlayerManager : MonoBehaviour {
             money = 9999999;
         }
         moneyText.text = $"$ {money}";
+    }
+
+    void CheckEnemyInFront() {
+        // Crear un rayo desde el centro de la cámara
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(centerWidth, centerHeight, 0));
+
+        // Crear una variable para almacenar la información del raycast
+        RaycastHit hit;
+
+        // Realizar el raycast
+        if (Physics.Raycast(ray, out hit, enemyRayCastDistance, enemyLayer)) {
+            // Si el raycast golpea a un enemigo, disparar el evento
+            OnPlayerLookAtEnemy?.Invoke(hit.transform);
+        }
     }
 }
