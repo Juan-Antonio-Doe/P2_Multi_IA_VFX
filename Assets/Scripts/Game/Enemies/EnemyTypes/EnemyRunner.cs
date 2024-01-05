@@ -10,18 +10,9 @@ public class EnemyRunner : Enemy {
 
     [field: Header("Autoattach properties")]
     [field: SerializeField, GetComponent, ReadOnlyField] protected NavMeshAgent agent { get; set; }
-    [field: SerializeField, ReadOnlyField] protected Transform playerBase { get; set; }
-    public Transform PlayerBase { get => playerBase; }
     [field: SerializeField] private bool revalidateProperties { get; set; } = false;
 
-    [field: Header("Move settings")]
-    [field: SerializeField] private float moveSpeed { get; set; } = 4f;
-    public float MoveSpeed { get => moveSpeed; }
-
-    //private RunnerState currentState { get; set; }
-
-    private float centerWidth { get; set; }
-    private float centerHeight { get; set; }
+    private EnemyState currentState { get; set; }
 
     private Coroutine hideCanvasAfterTimeCo;
 
@@ -33,24 +24,23 @@ public class EnemyRunner : Enemy {
         if (!isValidPrefabStage/* && prefabConnected*/) {
             // Variables that will only be checked when they are in a scene
             if (!Application.isPlaying) {
-                if (playerBase == null || revalidateProperties) {
-                    revalidateProperties = false;
-                    playerBase = GameObject.FindGameObjectWithTag("PlayerBase").transform/*.GetChild(0)*/;
-                }
-
-                if (healthText == null || revalidateProperties) {
-                    revalidateProperties = false;
-                    healthText = healthBar.transform.GetChild(0).GetComponent<Text>();
-                }
-
-                if (enemyCanvasGO == null || revalidateProperties) {
-                    revalidateProperties = false;
-                    enemyCanvasGO = healthBar.gameObject.GetComponentInParent<Canvas>().gameObject;
-                }
+                if (revalidateProperties)
+                    Validate();
             }
         }
 
 #endif
+    }
+
+    void Validate() {
+        if (healthText == null || revalidateProperties) {
+            healthText = healthBar.transform.GetChild(0).GetComponent<Text>();
+        }
+
+        if (enemyCanvasGO == null || revalidateProperties) {
+            enemyCanvasGO = healthBar.gameObject.GetComponentInParent<Canvas>().gameObject;
+        }
+        revalidateProperties = false;
     }
 
     void OnEnable() {
@@ -65,14 +55,15 @@ public class EnemyRunner : Enemy {
 
     void Start() {
         enemyCanvasGO.SetActive(false);
-        centerWidth = Screen.width / 2;
-        centerHeight = Screen.height / 2;
 
-        //currentState = new ArcherMovingForwardState(this, agent);
+        currentState = new EnemyMovingToPlayerBaseState(this, agent);
     }
 
     void Update() {
-        //currentState = currentState.Process();
+        if (!LevelManager.isStarted)
+            return;
+
+        currentState = currentState.Process();
 
         // Si el jugador deja de mirar al enemigo y el canvas está activo
         if (!isPlayerLookingAtEnemy && enemyCanvasGO.activeInHierarchy && !isHideCanvasCoActive) {

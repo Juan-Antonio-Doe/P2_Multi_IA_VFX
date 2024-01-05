@@ -43,6 +43,9 @@ public class PlayerManager : MonoBehaviour {
         if (!isDead) {
             CheckEnemyInFront();
         }
+
+        // Fix the ******* bug when CharacterJokeController collides with rigidbodies.
+        transform.position = new Vector3(transform.position.x, 0, transform.position.z);
     }
 
     public void TakeDamage(int damage) {
@@ -88,6 +91,18 @@ public class PlayerManager : MonoBehaviour {
         if (Physics.Raycast(ray, out hit, enemyRayCastDistance, enemyLayer)) {
             // Si el raycast golpea a un enemigo, disparar el evento
             OnPlayerLookAtEnemy?.Invoke(hit.transform);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Spear")) {
+            TakeDamage(10);
+        }
+    }
+
+    private void OnTriggerStay(Collider other) {
+        if (other.CompareTag("Spear")) {
+            TakeDamage(1);
         }
     }
 }

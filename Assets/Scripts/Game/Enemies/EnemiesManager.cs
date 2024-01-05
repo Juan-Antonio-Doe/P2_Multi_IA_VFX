@@ -11,6 +11,8 @@ public class EnemiesManager : MonoBehaviour {
     [field: Header("Autoattach properties")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private LevelManager levelManager { get; set; }
     [field: SerializeField, ReadOnlyField] private List<Transform> allSpawnPoints { get; set; } = new List<Transform>();
+    [field: SerializeField, ReadOnlyField] protected Transform playerBase { get; set; }
+    public Transform PlayerBase { get { return playerBase; } }
     [field: SerializeField] private bool revalidateProperties { get; set; }
 
     public enum WaveStates {
@@ -52,6 +54,11 @@ public class EnemiesManager : MonoBehaviour {
             //revalidateProperties = false;
             allSpawnPoints = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
         }
+
+        if (playerBase == null || revalidateProperties) {
+            playerBase = GameObject.FindGameObjectWithTag("PlayerBase").transform/*.GetChild(0)*/;
+        }
+
         revalidateProperties = false;
     }
 
