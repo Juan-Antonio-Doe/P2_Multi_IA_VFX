@@ -14,6 +14,11 @@ public class EnemyDeadState : EnemyState {
 
         inDeadState = true;
         agent.enabled = false;
+
+        if (!enemy.Rb.isKinematic)
+            enemy.Rb.velocity = Vector3.zero;
+
+        enemy.gameObject.SetActive(false);
     }
 
     /*public override void Update() {
@@ -29,6 +34,12 @@ public class EnemyDeadState : EnemyState {
     void Reset() {
         enemy.IsDead = false;
         inDeadState = false;
+
+        if (!enemy.Rb.isKinematic) {
+            enemy.Rb.velocity = Vector3.zero;
+            enemy.Rb.angularVelocity = Vector3.zero;
+        }
+
         agent.enabled = true;
         agent.ResetPath();
     }

@@ -13,6 +13,10 @@ public class EnemiesManager : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private List<Transform> allSpawnPoints { get; set; } = new List<Transform>();
     [field: SerializeField, ReadOnlyField] protected Transform playerBase { get; set; }
     public Transform PlayerBase { get { return playerBase; } }
+
+    [field: SerializeField, ReadOnlyField] private Transform[] spawnPointsZone1 { get; set; }
+    [field: SerializeField, ReadOnlyField] private Transform[] spawnPointsZone2 { get; set; }
+
     [field: SerializeField] private bool revalidateProperties { get; set; }
 
     public enum WaveStates {
@@ -31,9 +35,15 @@ public class EnemiesManager : MonoBehaviour {
     [field: Header("Enemies pool")]
     [field: SerializeField, ReadOnlyField] private List<Enemy> allEnemiesDisabled { get; set; } = new List<Enemy>();
 
+    [field: Header("Enemy Zones")]
+    [field: SerializeField] private GameObject zone2Wall { get; set; }
+
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private WaveStates waveState { get; set; } = WaveStates.Stopped;
     public WaveStates WaveState { get => waveState; }
+    [field: SerializeField, ReadOnlyField] private int currentEnemiesSpawned { get; set; }
+
+    private bool zone2Open { get; set; }
 
     void OnValidate() {
 #if UNITY_EDITOR
@@ -49,10 +59,16 @@ public class EnemiesManager : MonoBehaviour {
 
     void ValidateAssings() {
         // Get all the spawnPoints in the scene in a simplified way.
+        if (spawnPointsZone1 == null || spawnPointsZone1.Length == 0 || revalidateProperties) {
+            spawnPointsZone1 = GameObject.FindGameObjectsWithTag("Respawn_1").Select(x => x.transform).ToArray();
+        }
+        if (spawnPointsZone2 == null || spawnPointsZone2.Length == 0 || revalidateProperties) {
+            spawnPointsZone2 = GameObject.FindGameObjectsWithTag("Respawn_2").Select(x => x.transform).ToArray();
+        }
 
         if (allSpawnPoints == null || allSpawnPoints.Count == 0 || revalidateProperties) {
-            //revalidateProperties = false;
-            allSpawnPoints = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
+            //allSpawnPoints = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
+            allSpawnPoints = spawnPointsZone1.ToList();
         }
 
         if (playerBase == null || revalidateProperties) {
@@ -66,9 +82,12 @@ public class EnemiesManager : MonoBehaviour {
     public bool PlayerDetected { get => playerDetected; set => playerDetected = value; }*/
 
     void Update() {
+        // For avoid that enemies children do anything when the game is ended.
+        if (LevelManager.isEnded)
+            gameObject.SetActive(false);
+
         if (waveState == WaveStates.InProgress) {
-            // Spawn enemies
-            if (allEnemiesDisabled.Count > 0) {
+            if (currentEnemiesSpawned < maxEnemiesPerWave) {
                 // Spawn enemy
                 if (enemyRespawnTimer <= 0) {
                     GetEnemyFromPool();
@@ -82,6 +101,9 @@ public class EnemiesManager : MonoBehaviour {
         }
         else if (waveState == WaveStates.OnCooldown) {
             enemyRespawnTimer = 0f;
+            if (levelManager.CurrentWave > 1) {
+                maxEnemiesPerWave += increaseEnemiesPerWave;
+            }
         }
         else if (waveState == WaveStates.Stopped) {
             enemyRespawnTimer = 0f;
@@ -93,17 +115,52 @@ public class EnemiesManager : MonoBehaviour {
     private void GetEnemyFromPool() {
         switch (levelManager.CurrentWave) {
             case 3:
-                // ToDo: Add new enemy type to spawn.
+                // ToDo: Add new enemy type to spawn and open the new spawn zone.
+                if (!zone2Open) {
+                    zone2Open = true;
+                    allSpawnPoints.AddRange(spawnPointsZone2.ToList());
+                    zone2Wall.SetActive(false);
+                }
                 break;
         }
+
+        //currentEnemiesSpawned++;
+
+        // if disabled enemies list is empty, instantiate a new enemy.
+        if (allEnemiesDisabled.Count == 0) {
+
+            int randomEnemyIndex = 0;
+            if (zone2Open) {
+                randomEnemyIndex = GenerateRandomNumber(0, enemyTypesToSpawn.Length);
+            }
+
+            GameObject enemyGO = Instantiate(enemyTypesToSpawn[randomEnemyIndex], transform);
+            MoveEnemyToRandomSpawn(enemyGO.transform);
+
+            Enemy enemy = enemyGO.GetComponent<Enemy>();
+            enemy.enemies = this;
+
+            currentEnemiesSpawned++;
+        }
+        else {
+            // Get the first enemy in the list and move it to a random spawn point.
+            Enemy enemy = allEnemiesDisabled[0];
+            allEnemiesDisabled.RemoveAt(0);
+            MoveEnemyToRandomSpawn(enemy.transform);
+            enemy.gameObject.SetActive(true);
+            currentEnemiesSpawned++;
+        }
+
     }
 
     public void MoveEnemyToRandomSpawn(Transform enemy) {
         //int randomSpawnIndex = Random.Range(0, allSpawnPoints.Count);
         int randomSpawnIndex = GenerateRandomNumber(0, allSpawnPoints.Count);
 
-        enemy.position = NavMesh.SamplePosition(allSpawnPoints[randomSpawnIndex].position, out NavMeshHit hit,
+        Vector3 spawnPos = NavMesh.SamplePosition(allSpawnPoints[randomSpawnIndex].position, out NavMeshHit hit,
             1f, NavMesh.AllAreas) ? hit.position : allSpawnPoints[randomSpawnIndex].position;
+
+        enemy.position = new Vector3(spawnPos.x, enemy.position.y, spawnPos.z);
     }
 
     public void StartEnemyRespawn() {
@@ -122,5 +179,10 @@ public class EnemiesManager : MonoBehaviour {
         int seed = System.DateTime.Now.Millisecond;
         Random.InitState(seed);
         return Random.Range(minInclusive, maxExclusive);
+    }
+
+    public void AddEnemyToPool(Enemy enemy) {
+        allEnemiesDisabled.Add(enemy);
+        currentEnemiesSpawned--;
     }
 }

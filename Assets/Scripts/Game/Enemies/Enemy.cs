@@ -8,9 +8,12 @@ using UnityEngine.UI;
 public abstract class Enemy : MonoBehaviour {
 
     [field: Header("Enemy settings")]
-    [field: SerializeField, FindObjectOfType, ReadOnlyField] public EnemiesManager enemies { get; private set; }
+    [field: SerializeField, FindObjectOfType, ReadOnlyField] public EnemiesManager enemies { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] protected Rigidbody rb { get; set; }
+    public Rigidbody Rb { get { return rb; } }
     [field: SerializeField] protected float maxHealth { get; set; } = 20f;
     [field: SerializeField, ReadOnlyField] protected float health { get; set; } = 20f;
+    [field: SerializeField] protected float damageReceivedByPlayer { get; set; } = 5f;
 
     [field: Header("UI")]
     [field: SerializeField] protected Image healthBar { get; set; }
@@ -53,7 +56,7 @@ public abstract class Enemy : MonoBehaviour {
         gameObject.SetActive(false);
     }
 
-    void UpdateUI() {
+    protected void UpdateUI() {
         healthBar.fillAmount = health / maxHealth;
         healthText.text = $"{health} / {maxHealth}";
     }

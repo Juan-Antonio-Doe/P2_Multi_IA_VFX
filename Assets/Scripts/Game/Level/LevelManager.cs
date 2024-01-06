@@ -8,26 +8,30 @@ using UnityEngine.UI;
 public class LevelManager : MonoBehaviour {
 
     [field: Header("AutoAttach on Editor properties")]
-    [field: SerializeField, GetComponent, ReadOnlyField] private LevelTimer levelTimer { get; set; }    // Manages the level timer.
-    //[field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemyManager enemyManager { get; set; }    // Manages the enemies
+    [field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemiesManager enemiesManager { get; set; }    // Manages the enemies.
+    [field: SerializeField, GetComponent, ReadOnlyField] private LevelTimer levelTimer { get; set; }            // Manages the level timer.
 
     [field: Header("--- UI settings ---")]
     [field: SerializeField] private Text waveText { get; set; }
+    [field: SerializeField] private GameObject victoryPanel { get; set; }
+    [field: SerializeField] private GameObject gameOverPanel { get; set; }
 
     [field: Header("--- Level manager properties ---")]
     [field: SerializeField] private float enemyWaveDurationMins { get; set; } = 8f;
     [field: SerializeField] private float enemyWaveIntervalSenconds { get; set; } = 15f;
+    [field: SerializeField] private int lastWave { get; set; } = 6;
 
     private float enemyWaveDurationSecs { get; set; }
     private bool isWaveActive { get; set; }
     private float currentTimeElapsed { get; set; }
 
     private int currentWave { get; set; } = 0;
-    public int CurrentWave { get => currentWave; }
+    public int CurrentWave { get { return currentWave; } }
 
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] public static bool isStarted { get; private set; }
+    [field: SerializeField, ReadOnlyField] public static bool isEnded { get; private set; }
 
     private float width { get; set; } = Screen.width / 2;
     private float height { get; set; } = Screen.height / 2;
@@ -45,7 +49,7 @@ public class LevelManager : MonoBehaviour {
 #endif
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && !isStarted) {
+        if (Input.GetKeyDown(KeyCode.Return) && !isStarted && !isEnded) {
             StartGame();
         }
 
@@ -60,6 +64,16 @@ public class LevelManager : MonoBehaviour {
     }
 
     void WaveUpdate() {
+        if (isEnded)
+            return;
+
+        if (currentWave > lastWave) {
+            EndLevel();
+            if (!gameOverPanel.activeInHierarchy)
+                victoryPanel.SetActive(true);
+            return;
+        }
+
         if (isWaveActive) {
             // Update the time elapsed
             currentTimeElapsed += Time.deltaTime;
@@ -86,11 +100,12 @@ public class LevelManager : MonoBehaviour {
         isWaveActive = true;
         currentTimeElapsed = 0f;
         currentWave++;
+
         waveText.text = currentWave.ToString();
 
         //Debug.Log($"Wave <color=red>{currentWave}</color> started.");
 
-        //enemyManager.StartEnemyRespawn();
+        enemiesManager.StartEnemyRespawn();
     }
 
     void EndCurrentWave() {
@@ -99,17 +114,25 @@ public class LevelManager : MonoBehaviour {
         isWaveActive = false;
         currentTimeElapsed = 0f;
 
-        //enemyManager.StopEnemyRespawn();
+        waveText.text = $"Incoming wave {currentWave + 1}...";
+
+        enemiesManager.StopEnemyRespawn();
     }
 
     public void EndLevel() {
         isStarted = false;
-        //enemyManager.StopWaves();
+        enemiesManager.StopWaves();
+        isEnded = true;
     }
 
+    public void GameOver() {
+        EndLevel();
+        if (!victoryPanel.activeInHierarchy)
+            gameOverPanel.SetActive(true);
+    }
 
     private void OnGUI() {
-        if (!isStarted) {
+        if (!isStarted && !isEnded) {
             GUI.color = Color.red;
             GUI.skin.label.fontSize = 60;
             // Show text on the center of the screen.

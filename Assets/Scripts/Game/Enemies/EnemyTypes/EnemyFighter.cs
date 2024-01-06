@@ -23,12 +23,14 @@ public class EnemyFighter : Enemy {
 
     private Coroutine hideCanvasAfterTimeCo;
 
+    private bool started { get; set; }
+
     void OnValidate() {
 #if UNITY_EDITOR
         UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
         bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
         bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
-        if (!isValidPrefabStage/* && prefabConnected*/) {
+        if (!isValidPrefabStage && prefabConnected) {
             // Variables that will only be checked when they are in a scene
             if (!Application.isPlaying) {
                 if (revalidateProperties)
@@ -51,11 +53,18 @@ public class EnemyFighter : Enemy {
     }
 
     void OnEnable() {
+        if (started) {
+            ResetEnemy2();
+        }
+
         // Suscribirse al evento cuando el objeto se activa
         PlayerManager.OnPlayerLookAtEnemy += ShowHideCanvas;
     }
 
     void OnDisable() {
+        enemies.AddEnemyToPool(this);
+        ResetEnemy1();
+
         // Anular la suscripción al evento cuando el objeto se desactiva
         PlayerManager.OnPlayerLookAtEnemy -= ShowHideCanvas;
     }
@@ -67,6 +76,8 @@ public class EnemyFighter : Enemy {
         defaultAttackCooldown = attackCooldown;
 
         currentState = new EnemyMovingToPlayerBaseState(this, agent);
+
+        started = true;
     }
 
     void Update() {
@@ -165,5 +176,27 @@ public class EnemyFighter : Enemy {
             // Start attack cooldown
             attackCooldown = defaultAttackCooldown;
         }
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        if (collision.gameObject.CompareTag("Projectile")) {
+            TakeDamage(damageReceivedByPlayer);
+        }
+    }
+
+    public void ResetEnemy1() {
+        isDead = false;
+        health = maxHealth;
+        UpdateUI();
+
+        if (hideCanvasAfterTimeCo != null) {
+            StopCoroutine(hideCanvasAfterTimeCo);
+            isHideCanvasCoActive = false;
+        }
+    }
+
+    public void ResetEnemy2() {
+        agent.enabled = true;
+        currentState?.ChangeState(new EnemyMovingToPlayerBaseState(this, agent));
     }
 }

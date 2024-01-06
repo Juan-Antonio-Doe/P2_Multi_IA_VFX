@@ -7,6 +7,9 @@ TagManager:
   - Enemy
   - PlayerBase
   - Spear
+  - Respawn_1
+  - Respawn_2
+  - Projectile
   layers:
   - Default
   - TransparentFX

@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PortalManager : MonoBehaviour {
@@ -17,8 +17,8 @@ public class PortalManager : MonoBehaviour {
     [field: SerializeField] private Image healthBar { get; set; }
     [field: SerializeField] private Text healthText { get; set; }
 
-    [field: Header("Portal Die Events")]
-    [field: SerializeField] private Action onPortalDie { get; set; }
+    [field: Header("Portal Die Event \n")]
+    [field: SerializeField] private UnityEvent onPortalDie { get; set; }
 
     void Start() {
         health = maxHealth;
@@ -44,7 +44,6 @@ public class PortalManager : MonoBehaviour {
         if (other.CompareTag("Enemy")) {
             TakeDamage(damageReceivedByEnemy);
             other.gameObject.SetActive(false);
-            //other.GetComponent<Enemy>().Respawn();
         }
     }
 
