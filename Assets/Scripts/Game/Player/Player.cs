@@ -7,6 +7,7 @@ public class Player : MonoBehaviour {
 
     [field: Header("Autottach on Editor properties")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private Camera cam { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] private PlayerManager playerManager { get; set; }
 
     [field: Header("Player Settings")]
     [field: SerializeField] private float speed { get; set; } = 3f;
@@ -16,7 +17,7 @@ public class Player : MonoBehaviour {
 
     [field: Header("Shooting Settings")]
     [field: SerializeField] private Transform shootOrigin { get; set; }
-    [field: SerializeField] private GameObject projectilePrefab { get; set; }
+    [field: SerializeField] private Projectile projectilePrefab { get; set; }
     [field: SerializeField] private float shootRate { get; set; } = 3;
 
     private float xRot { get; set; } = 0f;
@@ -87,6 +88,7 @@ public class Player : MonoBehaviour {
     void CreateProjectile(Vector3 _position, Quaternion _rotation) {
         //El propio proyectil lleva un script que hace que se añada velocity en su transform.forward, por eso rotamos el proyectil
         //para que mire hacia la direccion en la que lo disparamos
-        Instantiate(projectilePrefab, _position, _rotation);
+        Projectile bullet = Instantiate(projectilePrefab, _position, _rotation);
+        bullet.owner = playerManager;
     }
 }

@@ -14,6 +14,7 @@ public abstract class Enemy : MonoBehaviour {
     [field: SerializeField] protected float maxHealth { get; set; } = 20f;
     [field: SerializeField, ReadOnlyField] protected float health { get; set; } = 20f;
     [field: SerializeField] protected float damageReceivedByPlayer { get; set; } = 5f;
+    [field: SerializeField] protected int moneyReward { get; set; } = 100;
 
     [field: Header("UI")]
     [field: SerializeField] protected Image healthBar { get; set; }
@@ -40,20 +41,25 @@ public abstract class Enemy : MonoBehaviour {
     protected bool isDead { get; set; }
     public bool IsDead { get { return isDead; } set { isDead = value; } }
 
-    public virtual void TakeDamage(float damage) {
+    public virtual void TakeDamage(float damage, PlayerManager killer=null) {
         if (health > 0) {
             health -= damage;
             if (health <= 0) {
                 health = 0;
-                Die();
+                Die(killer);
             }
             UpdateUI();
         }
     }
 
-    protected virtual void Die() {
+    protected virtual void Die(PlayerManager killer=null) {
         isDead = true;
-        gameObject.SetActive(false);
+
+        if (killer != null) {
+            killer.ChangeMoney(moneyReward);
+        }
+
+        //gameObject.SetActive(false);
     }
 
     protected void UpdateUI() {

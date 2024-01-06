@@ -6,17 +6,17 @@ using UnityEngine;
 public class Trap : MonoBehaviour {
 
     [field: Header("Autoattach on Editor properties")]
-    [field: SerializeField, GetComponent, ReadOnlyField] private Renderer rend { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] protected Renderer rend { get; set; }
 
     [field: Header("Trap Settings")]
-    [field: SerializeField] private Material holoMat { get; set; } //El material que debe tener la trampa cuando esta en modo placeholder
-    private Material initialMat { get; set; }
-    [field: SerializeField] private int moneyCost { get; set; } = 10;
+    [field: SerializeField] protected Material holoMat { get; set; } //El material que debe tener la trampa cuando esta en modo placeholder
+    protected Material initialMat { get; set; }
+    [field: SerializeField] protected int moneyCost { get; set; } = 10;
     public int MoneyCost { get { return moneyCost; } }
 
 
     [field: Header("Debug")]
-    [field: SerializeField, ReadOnlyField] private bool isPlaced { get; set; } //Para comprobar que no haga su efecto antes de que isPlaced este en true
+    [field: SerializeField, ReadOnlyField] protected bool isPlaced { get; set; } //Para comprobar que no haga su efecto antes de que isPlaced este en true
     public bool IsPlaced { get { return isPlaced; } set { isPlaced = value; } }
 
     void Awake() {

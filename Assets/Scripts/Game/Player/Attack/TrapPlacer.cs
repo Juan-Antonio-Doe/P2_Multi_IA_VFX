@@ -1,34 +1,76 @@
 using Nrjwolf.Tools.AttachAttributes;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TrapPlacer : MonoBehaviour {
 
     [field: Header("Autoattach Settings")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private Camera cam { get; set; }
     [field: SerializeField, GetComponent, ReadOnlyField] private PlayerManager playerManager { get; set; }
+    [field: SerializeField, ReadOnlyField] private Text moneyCostText { get; set; }
+    [field: SerializeField] private bool revalidateProperties { get; set; } = false;
 
     [field: Header("Trap Placer Settings")]
     // LayerMask para los obstaculos y otras trampas (6 = Obstacle y 7 = Trap)
     [field: SerializeField, ReadOnlyField] private LayerMask blockLayer { get; set; } = 1 << 6 | 1 << 7;
     [field: SerializeField, ReadOnlyField] private KeyCode enterTrapModeKey { get; set; } = KeyCode.T;
     [field: SerializeField, ReadOnlyField] private KeyCode placeTrapKey { get; set; } = KeyCode.Space;
-    [field: SerializeField] private Trap trapPrefab { get; set; }
+    [field: SerializeField] private Trap[] trapPrefabs { get; set; }
     [field: SerializeField] private float rayLength { get; set; } = 2f;
 
     private Trap tempTrap { get; set; }
+    private int currentTrapIndex { get; set; }
+
+    void OnValidate() {
+#if UNITY_EDITOR
+        UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+        bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
+        bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
+        if (!isValidPrefabStage/* && prefabConnected*/) {
+            // Variables that will only be checked when they are in a scene
+            if (!Application.isPlaying) {
+                if (revalidateProperties)
+                    Validate();
+            }
+        }
+
+#endif
+    }
+
+    void Validate() {
+        if (moneyCostText == null || revalidateProperties) {
+            moneyCostText = GameObject.Find("MoneyTrapCostText").GetComponent<Text>();
+        }
+        revalidateProperties = false;
+    }
 
     void Update() {
         if (!LevelManager.isStarted)
             return;
 
+        // Mostramos el coste de la trampa temporal en el texto junto con el nombre de la trampa acortando el texto "(Clone)"
+        moneyCostText.text = tempTrap != null ? $"{tempTrap.name.Replace("(Clone)", "")} | - {tempTrap.MoneyCost}" : "";
+
         //Cambiamos al modo de colocar trampas
         if (Input.GetKeyDown(enterTrapModeKey)) {
             TryPlaceTrap();
         }
+
         //Cuando la trampa temporal no es null, significa que estamos intentando colocar una trampa
         if (tempTrap != null) {
+            // Switch trap with mouse wheel
+            if (Input.GetAxis("Mouse ScrollWheel") > 0f) // forward
+            {
+                SwichTrap(true);
+            }
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // backwards
+            {
+                SwichTrap(false);
+            }
+
             //Movemos la trampa placeholder a la posicion del suelo en la que se colocaria
             tempTrap.transform.position = GetRoundedCenterGroundPos(tempTrap.transform.position.y);
 
@@ -48,7 +90,7 @@ public class TrapPlacer : MonoBehaviour {
         {
             //Si NO existe la trampla placeholder, la instancia para entrar al modo de colocar trampa y poder ver donde se colocara
             case true:
-                tempTrap = Instantiate(trapPrefab, trapPrefab.transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
+                tempTrap = Instantiate(trapPrefabs[currentTrapIndex], trapPrefabs[currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
                 break;
             //Si SI existe la trampla placeholder, la destruye para salir del modo colocar trampa
             case false:
@@ -109,6 +151,23 @@ public class TrapPlacer : MonoBehaviour {
         }
         _roundedPos.y = _yPos;
         return _roundedPos;
+    }
+
+    void SwichTrap(bool forwardDir) {
+        if (forwardDir) {
+            currentTrapIndex++;
+            if (currentTrapIndex >= trapPrefabs.Length) {
+                currentTrapIndex = 0;
+            }
+        }
+        else {
+            currentTrapIndex--;
+            if (currentTrapIndex < 0) {
+                currentTrapIndex = trapPrefabs.Length - 1;
+            }
+        }
+        Destroy(tempTrap.gameObject);
+        tempTrap = Instantiate(trapPrefabs[currentTrapIndex], trapPrefabs[currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
     }
 
     private void OnDrawGizmos() {

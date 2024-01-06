@@ -12,6 +12,9 @@ public class Projectile : MonoBehaviour {
     [field: SerializeField] private float speed { get; set; } = 5f;
     [field: SerializeField] private float lifeTime { get; set; } = 5f;
 
+    [field: Header("Debug")]
+    [field: SerializeField, ReadOnlyField] public PlayerManager owner { get; set; }
+
     void OnEnable() {
         //Para que funcione, hay que asegurarse de que el proyectil esta rotado para que mire hacia la direccion en la que queremos dispararlo
         rb.velocity = transform.forward * speed;

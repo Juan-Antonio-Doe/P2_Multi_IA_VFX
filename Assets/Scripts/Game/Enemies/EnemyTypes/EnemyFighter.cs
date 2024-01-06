@@ -118,9 +118,9 @@ public class EnemyFighter : Enemy {
         }
     }
 
-    protected override void Die() {
-        //base.Die();
-        isDead = true;
+    protected override void Die(PlayerManager killer) {
+        base.Die(killer);
+        //isDead = true;
     }
 
     void ShowHideCanvas(Transform enemyTransform) {
@@ -180,7 +180,7 @@ public class EnemyFighter : Enemy {
 
     private void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.CompareTag("Projectile")) {
-            TakeDamage(damageReceivedByPlayer);
+            TakeDamage(damageReceivedByPlayer, collision.gameObject.GetComponent<Projectile>().owner);
         }
     }
 
