@@ -1,14 +1,21 @@
+using Nrjwolf.Tools.AttachAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour {
 
-	//[field: Header("Autottach on Editor properties")]
+	[field: Header("Autottach on Editor properties")]
+    [field: SerializeField, GetComponent, ReadOnlyField] private CharacterController charJoke { get; set; }
+    [field: SerializeField, ReadOnlyField] private Transform[] playerBaseSpawns { get; set; }
+    [field: SerializeField, ReadOnlyField] private Image deadFadePanel { get; set; }
+    [field: SerializeField] private bool revalidateProperties { get; set; }
 
-	[field: Header("Player Settings")]
+    [field: Header("Player Settings")]
 	[field: SerializeField] private float maxHealth { get; set; } = 100;
 	[field: SerializeField] private float currentHealth { get; set; } = 100;
 	[field: SerializeField] private int money { get; set; } = 0;
@@ -32,6 +39,30 @@ public class PlayerManager : MonoBehaviour {
     private float centerWidth { get; set; }
     private float centerHeight { get; set; }
 
+    void OnValidate() {
+#if UNITY_EDITOR
+        UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+        bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
+        bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
+        if (!isValidPrefabStage/* && prefabConnected*/) {
+            if (revalidateProperties)
+                ValidateAssings();
+        }
+#endif
+    }
+
+    void ValidateAssings() {
+        if (deadFadePanel == null || revalidateProperties) {
+            deadFadePanel = GameObject.Find("DeadFadePanel").GetComponent<Image>();
+        }
+
+        if (playerBaseSpawns == null || playerBaseSpawns.Length == 0 || revalidateProperties) {
+            playerBaseSpawns = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToArray();
+        }
+
+        revalidateProperties = false;
+    }
+
     void Start() {
         centerWidth = Screen.width / 2;
         centerHeight = Screen.height / 2;
@@ -45,7 +76,7 @@ public class PlayerManager : MonoBehaviour {
         }
 
         // Fix the ******* bug when CharacterJokeController collides with rigidbodies.
-        transform.position = new Vector3(transform.position.x, 0, transform.position.z);
+        //transform.position = new Vector3(transform.position.x, 0, transform.position.z);
     }
 
     public void TakeDamage(float damage) {
@@ -60,6 +91,7 @@ public class PlayerManager : MonoBehaviour {
 
     void Die() {
         isDead = true;
+        StartCoroutine(DeathTeleportCo());
     }
 
     public void ChangeMoney(int amount) {
@@ -69,11 +101,10 @@ public class PlayerManager : MonoBehaviour {
 
     void UpdateHealthUI() {
         healthBar.fillAmount = currentHealth / maxHealth;
-        healthText.text = $"{currentHealth}/{maxHealth}";
+        healthText.text = $"{(int)currentHealth}/{maxHealth}";
     }
 
     void UpdateMoneyUI() {
-        // no más de 9999999
         if (money > 9999999) {
             money = 9999999;
         }
@@ -104,5 +135,44 @@ public class PlayerManager : MonoBehaviour {
         if (other.CompareTag("Spear")) {
             TakeDamage(2f * Time.deltaTime);
         }
+    }
+
+    IEnumerator DeathTeleportCo() {
+        // Fade in
+        float t = 0;
+        while (t < 1) {
+            t += Time.deltaTime;
+            deadFadePanel.color = new Color(0, 0, 0, t);
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        charJoke.enabled = false;
+
+        transform.position = playerBaseSpawns[0].position;
+        transform.rotation = playerBaseSpawns[0].rotation;
+
+        charJoke.enabled = true;
+
+        currentHealth = maxHealth;
+        UpdateHealthUI();
+
+        // Fade out
+        t = 1;
+        while (t > 0) {
+            t -= Time.deltaTime;
+            deadFadePanel.color = new Color(0, 0, 0, t);
+            yield return null;
+        }
+
+        isDead = false;
+    }
+
+    private void OnDestroy() {
+        if (gameObject == null)
+            return;
+
+        StopAllCoroutines();
     }
 }

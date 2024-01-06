@@ -64,6 +64,6 @@ public abstract class Enemy : MonoBehaviour {
 
     protected void UpdateUI() {
         healthBar.fillAmount = health / maxHealth;
-        healthText.text = $"{health} / {maxHealth}";
+        healthText.text = $"{(int)health} / {maxHealth}";
     }
 }

@@ -15,10 +15,8 @@ public class TrapTriggerProxy : MonoBehaviour {
         if (!trap.IsPlaced)
             return;
 
-        Debug.Log("Triggered");
-
         if (other.CompareTag("Enemy")) {
-            other.GetComponent<Enemy>().TakeDamage(damage);
+            other.GetComponent<Enemy>().TakeDamage(damage, trap.owner);
         }
     }
 }

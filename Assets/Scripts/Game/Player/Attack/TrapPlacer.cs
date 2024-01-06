@@ -103,6 +103,7 @@ public class TrapPlacer : MonoBehaviour {
         //Marcamos la trampa como colocada si no lo estaba aun
         if (tempTrap.IsPlaced == false) {
             tempTrap.Place();
+            tempTrap.owner = playerManager;
             playerManager.ChangeMoney(-tempTrap.MoneyCost);
         }
     }

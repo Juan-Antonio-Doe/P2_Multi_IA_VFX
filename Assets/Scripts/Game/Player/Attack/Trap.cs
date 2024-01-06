@@ -18,6 +18,7 @@ public class Trap : MonoBehaviour {
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] protected bool isPlaced { get; set; } //Para comprobar que no haga su efecto antes de que isPlaced este en true
     public bool IsPlaced { get { return isPlaced; } set { isPlaced = value; } }
+    [field: SerializeField, ReadOnlyField] public PlayerManager owner { get; set; }
 
     void Awake() {
         initialMat = rend.material;
