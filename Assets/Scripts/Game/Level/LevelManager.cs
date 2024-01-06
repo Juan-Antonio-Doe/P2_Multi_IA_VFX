@@ -101,6 +101,10 @@ public class LevelManager : MonoBehaviour {
         currentTimeElapsed = 0f;
         currentWave++;
 
+        if (currentWave > lastWave) {
+            return;
+        }
+
         waveText.text = currentWave.ToString();
 
         //Debug.Log($"Wave <color=red>{currentWave}</color> started.");
@@ -114,7 +118,12 @@ public class LevelManager : MonoBehaviour {
         isWaveActive = false;
         currentTimeElapsed = 0f;
 
-        waveText.text = $"Incoming wave {currentWave + 1}...";
+        if (currentWave == lastWave)
+            waveText.text = $"<color=green>Final wave completed!</color>";
+        else if (currentWave == lastWave - 1)
+            waveText.text = "Incoming final wave...";
+        else
+            waveText.text = $"Incoming wave {currentWave + 1}...";
 
         enemiesManager.StopEnemyRespawn();
     }

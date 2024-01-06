@@ -77,6 +77,8 @@ public class EnemyFighter : Enemy {
 
         currentState = new EnemyMovingToPlayerBaseState(this, agent);
 
+        UpdateUI();
+
         started = true;
     }
 

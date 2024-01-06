@@ -68,6 +68,7 @@ public class PlayerManager : MonoBehaviour {
         centerHeight = Screen.height / 2;
 
         currentHealth = maxHealth;
+        UpdateHealthUI();
     }
 
     void Update() {

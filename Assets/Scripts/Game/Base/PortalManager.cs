@@ -22,6 +22,7 @@ public class PortalManager : MonoBehaviour {
 
     void Start() {
         health = maxHealth;
+        UpdateHealthUI();
     }
 
     public void TakeDamage(int damage) {

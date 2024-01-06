@@ -1685,8 +1685,8 @@ MonoBehaviour:
   <enterTrapModeKey>k__BackingField: 116
   <placeTrapKey>k__BackingField: 32
   <trapPrefabs>k__BackingField:
-  - {fileID: 1506146290, guid: 18a1c09838ed0d14d8abe9e6c71f5116, type: 3}
   - {fileID: 836725130333637773, guid: abc5741b2a1a0514cb7612b9eb97d899, type: 3}
+  - {fileID: 6016794410777814019, guid: 13584c338cf40234da2f05593fcc21e0, type: 3}
   <rayLength>k__BackingField: 8
 --- !u!114 &326827033
 MonoBehaviour:
@@ -6270,9 +6270,9 @@ MonoBehaviour:
   <waveText>k__BackingField: {fileID: 1364569545}
   <victoryPanel>k__BackingField: {fileID: 143067725}
   <gameOverPanel>k__BackingField: {fileID: 863069493}
-  <enemyWaveDurationMins>k__BackingField: 0.05
+  <enemyWaveDurationMins>k__BackingField: 1
   <enemyWaveIntervalSenconds>k__BackingField: 10
-  <lastWave>k__BackingField: 100
+  <lastWave>k__BackingField: 6
 --- !u!114 &2090281658
 MonoBehaviour:
   m_ObjectHideFlags: 0

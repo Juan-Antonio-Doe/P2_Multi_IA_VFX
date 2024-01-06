@@ -803,8 +803,9 @@ MonoBehaviour:
   <rend>k__BackingField: {fileID: 3466667000637119665}
   <holoMat>k__BackingField: {fileID: 2100000, guid: 31c69e1474ec19647b1bc38c8e45c875,
     type: 2}
-  <moneyCost>k__BackingField: 0
+  <moneyCost>k__BackingField: 300
   <isPlaced>k__BackingField: 0
+  <owner>k__BackingField: {fileID: 0}
   <anim>k__BackingField: {fileID: 8893432083718677998}
   <activeTime>k__BackingField: 5
   <cooldownTime>k__BackingField: 5
