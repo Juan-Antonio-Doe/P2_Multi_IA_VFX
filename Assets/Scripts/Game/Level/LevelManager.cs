@@ -1,4 +1,5 @@
 using Nrjwolf.Tools.AttachAttributes;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,20 +37,35 @@ public class LevelManager : MonoBehaviour {
     private float width { get; set; } = Screen.width / 2;
     private float height { get; set; } = Screen.height / 2;
 
+    private string textBeforeStart { get; set; }
+
     void Start() {
         enemyWaveDurationSecs = enemyWaveDurationMins * 60;
+
+        if (PhotonNetwork.IsMasterClient) {
+            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
+                $" - Pulse <b><color=clear>Enter</color></b> para empezar la partida.\n" +
+                $" - Pulse <b><color=clear>F4</color></b> para salir.";
+        }
+        else {
+            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
+                $" - Esperando al anfitrión...";
+        }
+        
     }
 
     void Update() {
         if (Input.GetKeyDown(KeyCode.F4)) {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+            //UnityEditor.EditorApplication.isPlaying = false;
+            PhotonNetwork.LeaveRoom();
 #else
-            Application.Quit();
+            //Application.Quit();
+            PhotonNetwork.LeaveRoom();
 #endif
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && !isStarted && !isEnded) {
+        if (Input.GetKeyDown(KeyCode.Return) && !isStarted && !isEnded && PhotonNetwork.IsMasterClient) {
             StartGame();
         }
 
@@ -61,6 +77,7 @@ public class LevelManager : MonoBehaviour {
 
     void StartGame() {
         isStarted = true;
+        PhotonNetwork.CurrentRoom.IsOpen = false;
     }
 
     void WaveUpdate() {
@@ -145,10 +162,7 @@ public class LevelManager : MonoBehaviour {
             GUI.color = Color.red;
             GUI.skin.label.fontSize = 60;
             // Show text on the center of the screen.
-            GUI.Label(new Rect(width - 250, height - 25, 1000, 1000),
-                $"Máximo de juegadores: <color=green>3</color>\n" +
-                $" - Pulse <b><color=clear>Enter</color></b> para empezar la partida.\n" +
-                $" - Pulse <b><color=clear>F4</color></b> para salir.");
+            GUI.Label(new Rect(width - 250, height - 25, 1000, 1000), textBeforeStart);
         }
     }
 }

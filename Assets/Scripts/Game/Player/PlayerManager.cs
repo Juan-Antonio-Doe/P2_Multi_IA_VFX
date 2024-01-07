@@ -1,4 +1,6 @@
+using Cinemachine;
 using Nrjwolf.Tools.AttachAttributes;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,12 +9,16 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerManager : MonoBehaviour {
+[RequireComponent(typeof(PhotonView))]
+public class PlayerManager : MonoBehaviourPun, IPunObservable {
 
 	[field: Header("Autottach on Editor properties")]
     [field: SerializeField, GetComponent, ReadOnlyField] private CharacterController charJoke { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] public MeshRenderer render { get; set; }
+    [field: SerializeField, GetComponent, ReadOnlyField] private TrapPlacer trapPlacer { get; set; }
     [field: SerializeField, ReadOnlyField] private Transform[] playerBaseSpawns { get; set; }
     [field: SerializeField, ReadOnlyField] private Image deadFadePanel { get; set; }
+    [field: SerializeField, ReadOnlyField] private Transform camPivot { get; set; }
     [field: SerializeField] private bool revalidateProperties { get; set; }
 
     [field: Header("Player Settings")]
@@ -39,12 +45,18 @@ public class PlayerManager : MonoBehaviour {
     private float centerWidth { get; set; }
     private float centerHeight { get; set; }
 
+    // -------------- Multiplayer --------------
+
+    private Vector3 networkPos;
+    private Quaternion networkRot;
+
+
     void OnValidate() {
 #if UNITY_EDITOR
         UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
         bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
         bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
-        if (!isValidPrefabStage/* && prefabConnected*/) {
+        if (!isValidPrefabStage && prefabConnected) {
             if (revalidateProperties)
                 ValidateAssings();
         }
@@ -60,37 +72,62 @@ public class PlayerManager : MonoBehaviour {
             playerBaseSpawns = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToArray();
         }
 
+        if (camPivot == null || revalidateProperties) {
+            camPivot = transform.GetChild(1);
+        }
+
         revalidateProperties = false;
     }
 
     void Start() {
+        gameObject.name = $"_Player_ - {photonView.Owner.NickName}";
+
         centerWidth = Screen.width / 2;
         centerHeight = Screen.height / 2;
 
         currentHealth = maxHealth;
-        UpdateHealthUI();
+
+        StartCoroutine(LateComponentsCo());
+
+        if (!photonView.IsMine) {
+            gameObject.layer = 10;  // RemotePlayer
+        }
     }
 
     void Update() {
-        if (!isDead) {
-            CheckEnemyInFront();
+        if (photonView.IsMine) {
+            if (!isDead) {
+                CheckEnemyInFront();
+            }
+        }
+        else {
+            SyncOtherPlayers();
         }
 
         // Fix the ******* bug when CharacterJokeController collides with rigidbodies.
         //transform.position = new Vector3(transform.position.x, 0, transform.position.z);
     }
 
+    void SyncOtherPlayers() {
+        transform.position = Vector3.MoveTowards(transform.position, networkPos, Time.deltaTime * 1000f);
+
+        if (networkRot != null)
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, networkRot, Time.deltaTime * 1000f);
+    }
+
     public void TakeDamage(float damage) {
         if (currentHealth > 0) {
             currentHealth -= damage;
             if (currentHealth <= 0) {
-                Die();
+                photonView.RPC(nameof(RPC_Die), RpcTarget.All);
+                //RPC_Die();
             }
             UpdateHealthUI();
         }
     }
 
-    void Die() {
+    [PunRPC]
+    void RPC_Die() {
         isDead = true;
         StartCoroutine(DeathTeleportCo());
     }
@@ -101,15 +138,19 @@ public class PlayerManager : MonoBehaviour {
     }
 
     void UpdateHealthUI() {
-        healthBar.fillAmount = currentHealth / maxHealth;
-        healthText.text = $"{(int)currentHealth}/{maxHealth}";
+        if (photonView.IsMine) {
+            healthBar.fillAmount = currentHealth / maxHealth;
+            healthText.text = $"{(int)currentHealth} / {maxHealth}";
+        }
     }
 
     void UpdateMoneyUI() {
-        if (money > 9999999) {
-            money = 9999999;
+        if (photonView.IsMine) {
+            if (money > 9999999) {
+                money = 9999999;
+            }
+            moneyText.text = $"$ {money}";
         }
-        moneyText.text = $"$ {money}";
     }
 
     void CheckEnemyInFront() {
@@ -127,12 +168,18 @@ public class PlayerManager : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
+        if (!photonView.IsMine)
+            return;
+
         if (other.CompareTag("Spear")) {
             TakeDamage(10);
         }
     }
 
     private void OnTriggerStay(Collider other) {
+        if (!photonView.IsMine)
+            return;
+
         if (other.CompareTag("Spear")) {
             TakeDamage(2f * Time.deltaTime);
         }
@@ -141,9 +188,12 @@ public class PlayerManager : MonoBehaviour {
     IEnumerator DeathTeleportCo() {
         // Fade in
         float t = 0;
+        Color renderColor = render.material.color;
         while (t < 1) {
             t += Time.deltaTime;
-            deadFadePanel.color = new Color(0, 0, 0, t);
+            if (photonView.IsMine)
+                deadFadePanel.color = new Color(0, 0, 0, t);
+            render.material.color = new Color(renderColor.r, renderColor.g, renderColor.b, 1 - t);
             yield return null;
         }
 
@@ -163,17 +213,79 @@ public class PlayerManager : MonoBehaviour {
         t = 1;
         while (t > 0) {
             t -= Time.deltaTime;
-            deadFadePanel.color = new Color(0, 0, 0, t);
+            render.material.color = new Color(renderColor.r, renderColor.g, renderColor.b, 1 - t);
+            if (photonView.IsMine)
+                deadFadePanel.color = new Color(0, 0, 0, t);
             yield return null;
         }
 
         isDead = false;
     }
 
+    /*void OnDrawGizmos() {
+#if UNITY_EDITOR
+        GUI.color = Color.green;
+        GUI.skin.label.fontSize = 40;
+        Handles.Label(transform.position + new Vector3(-1.2f, 1.25f, 0), gameObject.name);
+#endif
+    }*/
+
     private void OnDestroy() {
         if (gameObject == null)
             return;
 
         StopAllCoroutines();
+        if (photonView.IsMine) {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info) {
+        if (stream.IsWriting) {
+            // Enviamos la posición y la rotación del jugador.
+            stream.SendNext(transform.position);
+            stream.SendNext(transform.rotation);
+        }
+        else {
+            // Recibimos la posición y la rotación del jugador.
+            networkPos = (Vector3)stream.ReceiveNext();
+            networkRot = (Quaternion)stream.ReceiveNext();
+        }
+    }
+
+    IEnumerator LateComponentsCo() {
+        // All compontents that can't be attached on editor because now Player is spawned as Prefab.
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (playerBaseSpawns == null || playerBaseSpawns.Length == 0) {
+            playerBaseSpawns = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToArray();
+        }
+        yield return null;
+
+        if (photonView.IsMine) {
+            if (deadFadePanel == null) {
+                deadFadePanel = GameObject.Find("DeadFadePanel").GetComponent<Image>();
+            }
+            yield return null;
+            if (healthBar == null) {
+                healthBar = GameObject.Find("PlayerHealthBar").GetComponent<Image>();
+                healthText = healthBar.transform.GetChild(0).GetComponent<Text>();
+            }
+            yield return null;
+            if (moneyText == null) {
+                moneyText = GameObject.Find("MoneyText").GetComponent<Text>();
+            }
+            yield return null;
+            FindObjectOfType<CinemachineVirtualCamera>().Follow = camPivot;
+            yield return null;
+            if (trapPlacer.cam == null)
+                trapPlacer.cam = Camera.main;
+            if (trapPlacer.moneyCostText == null)
+                trapPlacer.moneyCostText = GameObject.Find("MoneyTrapCostText").GetComponent<Text>();
+
+            UpdateHealthUI();
+        }
     }
 }

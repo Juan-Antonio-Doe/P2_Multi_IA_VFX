@@ -34,6 +34,9 @@ public class Player : MonoBehaviour {
     void Start() {
         TryGetComponent(out controller);
 
+        if (cam == null)
+            cam = Camera.main;
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

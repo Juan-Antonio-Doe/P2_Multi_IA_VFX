@@ -55,6 +55,9 @@ public class RoomManager : MonoBehaviourPunCallbacks {
     }
 
     public void ChangeNickName(string _nickName) {
-        PhotonNetwork.NickName = _nickName;
+        if (_nickName == "")
+            PhotonNetwork.NickName = "Zero";
+        else
+            PhotonNetwork.NickName = _nickName;
     }
 }

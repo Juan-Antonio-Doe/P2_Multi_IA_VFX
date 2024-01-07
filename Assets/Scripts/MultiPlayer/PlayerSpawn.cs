@@ -7,10 +7,12 @@ using UnityEngine.UI;
 
 public class PlayerSpawn : MonoBehaviourPunCallbacks {
 
+    [field: Header("Player spawn properties")]
     [field: SerializeField] private GameObject prefab { get; set; }
     private float yPos { get; set; } = 0f;
 
     [field: SerializeField] private GameObject[] spawnPoints { get; set; }
+
 
     //private int playerCount { get; set; } = 0;
 
@@ -22,7 +24,17 @@ public class PlayerSpawn : MonoBehaviourPunCallbacks {
 
         yield return new WaitForSeconds(0.5f); // Hay que añadir este Delay para que funcione correctamente.
         // Crea un prefab para todos los usuarios conectados en la posicion indicada.
-        PhotonNetwork.Instantiate(prefab.name, _spawnPos, prefab.transform.rotation);
+        GameObject playerGO = PhotonNetwork.Instantiate(prefab.name, _spawnPos, prefab.transform.rotation);
+        PlayerManager playerManager = playerGO.GetComponent<PlayerManager>();
+
+        switch (PhotonNetwork.CurrentRoom.PlayerCount) {
+            case 2:
+                playerManager.render.material.color = Color.green;
+                break;
+            case 3:
+                playerManager.render.material.color = Color.blue;
+                break;
+        }
     }
 
     void Init() {

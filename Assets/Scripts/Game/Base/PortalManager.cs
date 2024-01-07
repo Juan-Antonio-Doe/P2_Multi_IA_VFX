@@ -50,6 +50,6 @@ public class PortalManager : MonoBehaviour {
 
     void UpdateHealthUI() {
         healthBar.fillAmount = (float) health / maxHealth;
-        healthText.text = $"{health}/{maxHealth}";
+        healthText.text = $"{health} / {maxHealth}";
     }
 }

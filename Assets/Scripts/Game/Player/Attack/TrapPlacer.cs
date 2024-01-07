@@ -8,9 +8,9 @@ using UnityEngine.UI;
 public class TrapPlacer : MonoBehaviour {
 
     [field: Header("Autoattach Settings")]
-    [field: SerializeField, FindObjectOfType, ReadOnlyField] private Camera cam { get; set; }
+    [field: SerializeField, FindObjectOfType, ReadOnlyField] public Camera cam { get; set; }
     [field: SerializeField, GetComponent, ReadOnlyField] private PlayerManager playerManager { get; set; }
-    [field: SerializeField, ReadOnlyField] private Text moneyCostText { get; set; }
+    [field: SerializeField, ReadOnlyField] public Text moneyCostText { get; set; }
     [field: SerializeField] private bool revalidateProperties { get; set; } = false;
 
     [field: Header("Trap Placer Settings")]
@@ -52,7 +52,8 @@ public class TrapPlacer : MonoBehaviour {
             return;
 
         // Mostramos el coste de la trampa temporal en el texto junto con el nombre de la trampa acortando el texto "(Clone)"
-        moneyCostText.text = tempTrap != null ? $"{tempTrap.name.Replace("(Clone)", "")} | - {tempTrap.MoneyCost}" : "";
+        if (moneyCostText != null)
+            moneyCostText.text = tempTrap != null ? $"{tempTrap.name.Replace("(Clone)", "")} | - {tempTrap.MoneyCost}" : "";
 
         //Cambiamos al modo de colocar trampas
         if (Input.GetKeyDown(enterTrapModeKey)) {
