@@ -51,6 +51,9 @@ public class TrapPlacer : MonoBehaviour {
         if (!LevelManager.isStarted)
             return;
 
+        if (!playerManager.photonView.IsMine)
+            return;
+
         // Mostramos el coste de la trampa temporal en el texto junto con el nombre de la trampa acortando el texto "(Clone)"
         if (moneyCostText != null)
             moneyCostText.text = tempTrap != null ? $"{tempTrap.name.Replace("(Clone)", "")} | - {tempTrap.MoneyCost}" : "";
@@ -103,9 +106,9 @@ public class TrapPlacer : MonoBehaviour {
     void PlaceTrap() {
         //Marcamos la trampa como colocada si no lo estaba aun
         if (tempTrap.IsPlaced == false) {
-            tempTrap.Place();
             tempTrap.owner = playerManager;
             playerManager.ChangeMoney(-tempTrap.MoneyCost);
+            tempTrap.Place();
         }
     }
 

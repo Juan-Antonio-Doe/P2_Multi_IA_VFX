@@ -25,16 +25,16 @@ public class PlayerSpawn : MonoBehaviourPunCallbacks {
         yield return new WaitForSeconds(0.5f); // Hay que añadir este Delay para que funcione correctamente.
         // Crea un prefab para todos los usuarios conectados en la posicion indicada.
         GameObject playerGO = PhotonNetwork.Instantiate(prefab.name, _spawnPos, prefab.transform.rotation);
-        PlayerManager playerManager = playerGO.GetComponent<PlayerManager>();
+        //PlayerManager playerManager = playerGO.GetComponent<PlayerManager>();
 
-        switch (PhotonNetwork.CurrentRoom.PlayerCount) {
+        /*switch (PhotonNetwork.CurrentRoom.PlayerCount) {
             case 2:
                 playerManager.render.material.color = Color.green;
                 break;
             case 3:
                 playerManager.render.material.color = Color.blue;
                 break;
-        }
+        }*/
     }
 
     void Init() {

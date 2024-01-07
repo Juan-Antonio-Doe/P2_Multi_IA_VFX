@@ -1,9 +1,10 @@
 using Nrjwolf.Tools.AttachAttributes;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+public class Player : MonoBehaviourPun {
 
     [field: Header("Autottach on Editor properties")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private Camera cam { get; set; }
@@ -45,6 +46,9 @@ public class Player : MonoBehaviour {
         if (!LevelManager.isStarted)
             return;
 
+        if (!photonView.IsMine)
+            return;
+
         if (!playerManager.IsDead) {
             MovementAndRotation();
             Shoot();
@@ -81,17 +85,20 @@ public class Player : MonoBehaviour {
                 //Calculamos la direccion en la que tiene que ir el proyectil a partir de donde ha impactado el Raycast
                 Vector3 _projectileDir = _hit.point - shootOrigin.position;
                 //Creamos el proyectil en el punto de origen y lo rotamos para que mire hacia la direccion en la que lo disparamos
-                CreateProjectile(shootOrigin.position, Quaternion.LookRotation(_projectileDir));
+                //CreateProjectile(shootOrigin.position, Quaternion.LookRotation(_projectileDir));
+                photonView.RPC(nameof(RPC_CreateProjectile), RpcTarget.All, shootOrigin.position, Quaternion.LookRotation(_projectileDir));
             }
             else //Si el rayo no golpea contra nada, simplemente disparamos el proyectil en la misma direccion del rayo
             {
                 //Creamos el proyectil en el punto de origen y lo rotamos para que mire hacia la direccion en la que lo disparamos
-                CreateProjectile(shootOrigin.position, Quaternion.LookRotation(_ray.direction));
+                //CreateProjectile(shootOrigin.position, Quaternion.LookRotation(_ray.direction));
+                photonView.RPC(nameof(RPC_CreateProjectile), RpcTarget.All, shootOrigin.position, Quaternion.LookRotation(_ray.direction));
             }
         }
     }
 
-    void CreateProjectile(Vector3 _position, Quaternion _rotation) {
+    [PunRPC]
+    void RPC_CreateProjectile(Vector3 _position, Quaternion _rotation) {
         //El propio proyectil lleva un script que hace que se añada velocity en su transform.forward, por eso rotamos el proyectil
         //para que mire hacia la direccion en la que lo disparamos
         Projectile bullet = Instantiate(projectilePrefab, _position, _rotation);

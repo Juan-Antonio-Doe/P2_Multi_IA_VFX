@@ -1,6 +1,7 @@
 using Cinemachine;
 using Nrjwolf.Tools.AttachAttributes;
 using Photon.Pun;
+using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -91,6 +92,15 @@ public class PlayerManager : MonoBehaviourPun, IPunObservable {
 
         if (!photonView.IsMine) {
             gameObject.layer = 10;  // RemotePlayer
+        }
+
+        switch (photonView.ViewID) {
+            case 2001:
+                render.material.color = Color.green;
+                break;
+            case 3001:
+                render.material.color = Color.blue;
+                break;
         }
     }
 
