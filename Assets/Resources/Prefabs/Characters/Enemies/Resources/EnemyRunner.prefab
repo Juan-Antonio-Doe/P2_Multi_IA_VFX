@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2799026423477957837}
   - component: {fileID: 3020024790221053938}
+  - component: {fileID: 6309339522248814874}
   - component: {fileID: 2764570005286273631}
   - component: {fileID: 5461107012159944273}
   - component: {fileID: 2452042861088619520}
@@ -53,6 +54,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <enemies>k__BackingField: {fileID: 0}
   <rb>k__BackingField: {fileID: 5461107012159944273}
+  <multiplayerID>k__BackingField: {fileID: 6309339522248814874}
   <maxHealth>k__BackingField: 20
   <health>k__BackingField: 20
   <damageReceivedByPlayer>k__BackingField: 5
@@ -67,6 +69,19 @@ MonoBehaviour:
   <attackTarget>k__BackingField: {fileID: 0}
   <agent>k__BackingField: {fileID: 2764570005286273631}
   <revalidateProperties>k__BackingField: 0
+--- !u!114 &6309339522248814874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2564897518200499240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e85fe1054434fe419ad9a3ce39e852c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: 0
 --- !u!195 &2764570005286273631
 NavMeshAgent:
   m_ObjectHideFlags: 0

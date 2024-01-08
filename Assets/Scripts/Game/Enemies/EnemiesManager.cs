@@ -29,7 +29,7 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
     }
 
     [field: Header("Enemies settings")]
-    [field: SerializeField] private GameObject[] enemyTypesToSpawn { get; set; }
+    [field: SerializeField] private Enemy[] enemyTypesToSpawn { get; set; }
     [field: SerializeField] private float enemyRespawnCooldown { get; set; } = 2f;
     private float enemyRespawnTimer { get; set; } = 0f;
     [field: SerializeField] private int maxEnemiesPerWave { get; set; } = 10;
@@ -85,7 +85,7 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
 
     public const int ENEMIES_SYNC_TYPE = 51, ENEMIES_SYNC_SPAWN_POS = 52;
 
-    private Transform currentEnemyTransform { get; set; }
+    private List<Enemy> allEnemiesListIstantiated { get; set; } = new List<Enemy>();
 
     void Start() {
         PhotonNetwork.AddCallbackTarget(this);
@@ -153,27 +153,30 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
             // Get the first enemy in the list and move it to a random spawn point.
             Enemy enemy = allEnemiesDisabled[0];
             allEnemiesDisabled.RemoveAt(0);
-            MoveEnemyToRandomSpawn(enemy.transform);
+            if (PhotonNetwork.IsMasterClient) {
+                MoveEnemyToRandomSpawn(enemy);
+            }
             enemy.gameObject.SetActive(true);
             currentEnemiesSpawned++;
         }
 
     }
 
-    public void MoveEnemyToRandomSpawn(Transform enemy) {
+    public void MoveEnemyToRandomSpawn(Enemy enemy) {
         //int randomSpawnIndex = Random.Range(0, allSpawnPoints.Count);
         int randomSpawnIndex = GenerateRandomNumber(0, allSpawnPoints.Count);
 
         Vector3 spawnPos = NavMesh.SamplePosition(allSpawnPoints[randomSpawnIndex].position, out NavMeshHit hit,
             1f, NavMesh.AllAreas) ? hit.position : allSpawnPoints[randomSpawnIndex].position;
 
-        currentEnemyTransform = enemy;
+        /*currentEnemyTransform = null;
+        currentEnemyTransform = enemy;*/
 
         // ---------- Multiplayer ------------
-        if (PhotonNetwork.IsMasterClient) {
-            //object[] data = new object[] { enemy, spawnPos };
-            PhotonNetwork.RaiseEvent(ENEMIES_SYNC_SPAWN_POS, spawnPos, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
-        }
+        //if (PhotonNetwork.IsMasterClient) {
+            object[] data = new object[] { enemy.multiplayerID.ID, spawnPos };
+            PhotonNetwork.RaiseEvent(ENEMIES_SYNC_SPAWN_POS, data, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+        //}
         //MP_MoveEnemy(enemy, spawnPos);
     }
 
@@ -193,7 +196,7 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
     }
 
     int GenerateRandomNumber(int minInclusive, int maxExclusive) {
-        int seed = System.DateTime.Now.Millisecond;
+        int seed = System.DateTime.Now.Millisecond + Time.frameCount;
         Random.InitState(seed);
         return Random.Range(minInclusive, maxExclusive);
     }
@@ -206,11 +209,15 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
     // ---------------- Multiplayer-Adapted Methods ----------------
 
     void MP_EnemyInstantiation(int randomEnemyIndex) {
-        GameObject enemyGO = Instantiate(enemyTypesToSpawn[randomEnemyIndex], transform);
-        MoveEnemyToRandomSpawn(enemyGO.transform);
-
-        Enemy enemy = enemyGO.GetComponent<Enemy>();
+        Enemy enemy = Instantiate(enemyTypesToSpawn[randomEnemyIndex], transform);
+        //Enemy enemy = enemyGO.GetComponent<Enemy>();
         enemy.enemies = this;
+
+        enemy.multiplayerID.ID = allEnemiesListIstantiated.Count;
+        allEnemiesListIstantiated.Add(enemy);
+
+        if (PhotonNetwork.IsMasterClient)
+            MoveEnemyToRandomSpawn(enemy);
 
         currentEnemiesSpawned++;
     }
@@ -219,8 +226,10 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
         enemy.position = new Vector3(spawnPos.x, enemy.position.y, spawnPos.z);
     }
 
-    void MP_MoveEnemyPatch(Vector3 spawnPos) {
-        currentEnemyTransform.position = new Vector3(spawnPos.x, currentEnemyTransform.position.y, spawnPos.z);
+    void MP_MoveEnemyPatch(int enemyID, Vector3 spawnPos) {
+        //currentEnemyTransform.position = new Vector3(spawnPos.x, currentEnemyTransform.position.y, spawnPos.z);
+        allEnemiesListIstantiated[enemyID].transform.position = 
+            new Vector3(spawnPos.x, allEnemiesListIstantiated[enemyID].transform.position.y, spawnPos.z);
     }
 
     public void OnEvent(EventData photonEvent) {
@@ -233,8 +242,13 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
         if (photonEvent.Code == ENEMIES_SYNC_SPAWN_POS) {
             //object[] data = (object[]) photonEvent.CustomData;
             //MP_MoveEnemy((Transform)data[0], (Vector3)data[1]);
-            MP_MoveEnemyPatch((Vector3) photonEvent.CustomData);
+
+            //MP_MoveEnemyPatch((Vector3) photonEvent.CustomData);
             //currentEnemyTransform = null;   // Generate a null exception. Why? Maybe because reseting after currentEnemyTransform.position is setted again.
+            // Ahora comentado, algunos se mueven muy seguidamente.
+
+            object[] data = (object[]) photonEvent.CustomData;
+            MP_MoveEnemyPatch((int)data[0], (Vector3)data[1]);
         }
     }
 }

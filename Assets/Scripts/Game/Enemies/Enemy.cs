@@ -11,6 +11,7 @@ public abstract class Enemy : MonoBehaviour {
     [field: SerializeField, FindObjectOfType, ReadOnlyField] public EnemiesManager enemies { get; set; }
     [field: SerializeField, GetComponent, ReadOnlyField] protected Rigidbody rb { get; set; }
     public Rigidbody Rb { get { return rb; } }
+    [field: SerializeField, GetComponent, ReadOnlyField] public MultiplayerID multiplayerID { get; private set; }
     [field: SerializeField] protected float maxHealth { get; set; } = 20f;
     [field: SerializeField, ReadOnlyField] protected float health { get; set; } = 20f;
     [field: SerializeField] protected float damageReceivedByPlayer { get; set; } = 5f;

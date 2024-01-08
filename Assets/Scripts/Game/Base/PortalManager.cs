@@ -20,8 +20,16 @@ public class PortalManager : MonoBehaviour {
     [field: Header("Portal Die Event \n")]
     [field: SerializeField] private UnityEvent onPortalDie { get; set; }
 
+    [field: Header("Debug")]
+    [field: SerializeField] private bool debug { get; set; }
+
     void Start() {
         health = maxHealth;
+
+        if (debug) {
+            health = maxHealth = 10000;
+        }
+
         UpdateHealthUI();
     }
 

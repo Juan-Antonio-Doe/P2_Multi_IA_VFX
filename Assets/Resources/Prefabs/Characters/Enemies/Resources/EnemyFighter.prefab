@@ -115,6 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6218050066627458295}
   - component: {fileID: 3750363781603532132}
+  - component: {fileID: 7044271592104030733}
   - component: {fileID: 3868458109660764073}
   - component: {fileID: 3317605150774592328}
   - component: {fileID: 8435435143698030441}
@@ -159,6 +160,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <enemies>k__BackingField: {fileID: 0}
   <rb>k__BackingField: {fileID: 3317605150774592328}
+  <multiplayerID>k__BackingField: {fileID: 7044271592104030733}
   <maxHealth>k__BackingField: 20
   <health>k__BackingField: 20
   <damageReceivedByPlayer>k__BackingField: 2
@@ -176,6 +178,19 @@ MonoBehaviour:
   <targetMasks>k__BackingField:
     serializedVersion: 2
     m_Bits: 1536
+--- !u!114 &7044271592104030733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7319230130567194375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e85fe1054434fe419ad9a3ce39e852c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: 0
 --- !u!195 &3868458109660764073
 NavMeshAgent:
   m_ObjectHideFlags: 0

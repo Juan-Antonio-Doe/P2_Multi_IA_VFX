@@ -1584,9 +1584,9 @@ MonoBehaviour:
   - {fileID: 1544985889}
   <revalidateProperties>k__BackingField: 0
   <enemyTypesToSpawn>k__BackingField:
-  - {fileID: 2564897518200499240, guid: eb54753da456c54449335eb34e46d99d, type: 3}
-  - {fileID: 7319230130567194375, guid: bd7c0e17139374549b3c00fc6b8ef15f, type: 3}
-  <enemyRespawnCooldown>k__BackingField: 1
+  - {fileID: 3020024790221053938, guid: eb54753da456c54449335eb34e46d99d, type: 3}
+  - {fileID: 3750363781603532132, guid: bd7c0e17139374549b3c00fc6b8ef15f, type: 3}
+  <enemyRespawnCooldown>k__BackingField: 2
   <maxEnemiesPerWave>k__BackingField: 5
   <increaseEnemiesPerWave>k__BackingField: 4
   <allEnemiesDisabled>k__BackingField: []
@@ -4618,6 +4618,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  <debug>k__BackingField: 1
 --- !u!1001 &1681623377
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6009,9 +6010,9 @@ MonoBehaviour:
   <waveText>k__BackingField: {fileID: 1364569545}
   <victoryPanel>k__BackingField: {fileID: 143067725}
   <gameOverPanel>k__BackingField: {fileID: 863069493}
-  <enemyWaveDurationMins>k__BackingField: 1
-  <enemyWaveIntervalSenconds>k__BackingField: 10
-  <lastWave>k__BackingField: 6
+  <enemyWaveDurationMins>k__BackingField: 0.15
+  <enemyWaveIntervalSenconds>k__BackingField: 15
+  <lastWave>k__BackingField: 60
 --- !u!114 &2090281658
 MonoBehaviour:
   m_ObjectHideFlags: 0
