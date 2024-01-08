@@ -13,13 +13,15 @@ public class RoomManager : MonoBehaviourPunCallbacks {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        PhotonNetwork.NickName = "Zero";
+
         Connect();
     }
 
     public void Connect() {
         PhotonNetwork.AutomaticallySyncScene = true;    // Activa la sincronizacion de escenas locales (cambiar el Mater Client, cambie el usuario).
 
-        //PhotonNetwork.SendRate = 10;    // Numero de veces que se envia la informacion por segundo.
+        //PhotonNetwork.SendRate = 50;    // Numero de veces que se envia la informacion por segundo.
 
         PhotonNetwork.ConnectUsingSettings(); // Conecta con Photon
     }

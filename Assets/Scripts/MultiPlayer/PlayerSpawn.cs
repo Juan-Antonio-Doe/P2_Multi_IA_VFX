@@ -17,7 +17,7 @@ public class PlayerSpawn : MonoBehaviourPunCallbacks {
     //private int playerCount { get; set; } = 0;
 
     IEnumerator Start() {
-
+        //PhotonNetwork.OfflineMode = true;
         Vector3 _spawnPos = GetSpawnPosition();
 
         Init();

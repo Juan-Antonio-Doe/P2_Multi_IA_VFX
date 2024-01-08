@@ -111,9 +111,6 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
         }
         else if (waveState == WaveStates.OnCooldown) {
             enemyRespawnTimer = 0f;
-            if (levelManager.CurrentWave > 1) {
-                maxEnemiesPerWave += increaseEnemiesPerWave;
-            }
         }
         else if (waveState == WaveStates.Stopped) {
             enemyRespawnTimer = 0f;
@@ -181,6 +178,9 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
     }
 
     public void StartEnemyRespawn() {
+        if (levelManager.CurrentWave > 1) {
+            maxEnemiesPerWave += increaseEnemiesPerWave;
+        }
         waveState = WaveStates.InProgress;
     }
 
@@ -234,7 +234,7 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
             //object[] data = (object[]) photonEvent.CustomData;
             //MP_MoveEnemy((Transform)data[0], (Vector3)data[1]);
             MP_MoveEnemyPatch((Vector3) photonEvent.CustomData);
-            currentEnemyTransform = null;
+            //currentEnemyTransform = null;   // Generate a null exception. Why? Maybe because reseting after currentEnemyTransform.position is setted again.
         }
     }
 }

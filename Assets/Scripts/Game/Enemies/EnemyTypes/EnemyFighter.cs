@@ -187,6 +187,7 @@ public class EnemyFighter : Enemy {
     }
 
     public void ResetEnemy1() {
+        transform.position = enemies.transform.position;
         isDead = false;
         health = maxHealth;
         UpdateUI();

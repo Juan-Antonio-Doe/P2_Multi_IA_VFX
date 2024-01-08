@@ -52,17 +52,6 @@ public class LevelManager : MonoBehaviour, IOnEventCallback {
 
         enemyWaveDurationSecs = enemyWaveDurationMins * 60;
 
-        if (PhotonNetwork.IsMasterClient) {
-            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
-                $" - Pulse <b><color=clear>Enter</color></b> para empezar la partida.\n" +
-                $" - Pulse <b><color=clear>F4</color></b> para salir.";
-        }
-        else {
-            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
-                $" - Esperando al anfitrión...\n" +
-                $" - Pulse <b><color=clear>F4</color></b> para salir \n de la partida.";
-        }
-        
         afterStart = true;
     }
 
@@ -174,6 +163,20 @@ public class LevelManager : MonoBehaviour, IOnEventCallback {
     }
 
     private void OnGUI() {
+        if (gameObject == null) // Error when exiting the game.
+            return;
+
+        if (PhotonNetwork.IsMasterClient) {
+            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
+                $" - Pulse <b><color=clear>Enter</color></b> para\n empezar la partida.\n" +
+                $" - Pulse <b><color=clear>F4</color></b> para salir.";
+        }
+        else {
+            textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
+                $" - Esperando al anfitrión...\n" +
+                $" - Pulse <b><color=clear>F4</color></b> para salir \n de la partida.";
+        }
+
         if (afterStart && !isStarted && !isEnded) {
             GUI.color = Color.red;
             GUI.skin.label.fontSize = 60;

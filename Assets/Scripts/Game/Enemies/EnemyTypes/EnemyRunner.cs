@@ -140,6 +140,7 @@ public class EnemyRunner : Enemy {
     }
 
     public void ResetEnemy1() {
+        transform.position = enemies.transform.position;
         isDead = false;
         health = maxHealth;
         UpdateUI();

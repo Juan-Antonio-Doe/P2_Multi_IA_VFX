@@ -88,10 +88,7 @@ MonoBehaviour:
   <charJoke>k__BackingField: {fileID: 8009814167899907966}
   <render>k__BackingField: {fileID: 1984017649591183533}
   <trapPlacer>k__BackingField: {fileID: 1496383915949112872}
-  <playerBaseSpawns>k__BackingField:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  <playerBaseSpawns>k__BackingField: []
   <deadFadePanel>k__BackingField: {fileID: 0}
   <camPivot>k__BackingField: {fileID: 1383495465419736442}
   <revalidateProperties>k__BackingField: 0
