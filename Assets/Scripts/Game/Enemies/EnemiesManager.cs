@@ -228,8 +228,9 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
 
     void MP_MoveEnemyPatch(int enemyID, Vector3 spawnPos) {
         //currentEnemyTransform.position = new Vector3(spawnPos.x, currentEnemyTransform.position.y, spawnPos.z);
-        allEnemiesListIstantiated[enemyID].transform.position = 
-            new Vector3(spawnPos.x, allEnemiesListIstantiated[enemyID].transform.position.y, spawnPos.z);
+        allEnemiesListIstantiated[enemyID].transform.position = new Vector3(spawnPos.x, 0f, spawnPos.z);
+
+        Debug.Log($"Enemy {allEnemiesListIstantiated[enemyID].name} moved to {spawnPos}");
     }
 
     public void OnEvent(EventData photonEvent) {
