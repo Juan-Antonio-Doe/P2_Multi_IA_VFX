@@ -109,12 +109,17 @@ public class PlayerManager : MonoBehaviourPun, IPunObservable {
             if (!isDead) {
                 CheckEnemyInFront();
             }
+
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                Cursor.visible = !Cursor.visible;
+                Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
+            }
         }
         else {
             SyncOtherPlayers();
         }
 
-        // Fix the ******* bug when CharacterJokeController collides with rigidbodies.
+        // Fix the ******* bug when CharacterJokeController collides with rigidbodies. May produce camera rotation bug.
         //transform.position = new Vector3(transform.position.x, 0, transform.position.z);
     }
 

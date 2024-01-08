@@ -1,4 +1,7 @@
+using ExitGames.Client.Photon;
 using Nrjwolf.Tools.AttachAttributes;
+using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemiesManager : MonoBehaviour {
+public class EnemiesManager : MonoBehaviour, IOnEventCallback {
 
     [field: Header("Autoattach properties")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private LevelManager levelManager { get; set; }
@@ -78,8 +81,15 @@ public class EnemiesManager : MonoBehaviour {
         revalidateProperties = false;
     }
 
-    /*private bool playerDetected { get; set; }
-    public bool PlayerDetected { get => playerDetected; set => playerDetected = value; }*/
+    // ---------------- Multiplayer ----------------
+
+    public const int ENEMIES_SYNC_TYPE = 51, ENEMIES_SYNC_SPAWN_POS = 52;
+
+    private Transform currentEnemyTransform { get; set; }
+
+    void Start() {
+        PhotonNetwork.AddCallbackTarget(this);
+    }
 
     void Update() {
         // For avoid that enemies children do anything when the game is ended.
@@ -134,13 +144,13 @@ public class EnemiesManager : MonoBehaviour {
                 randomEnemyIndex = GenerateRandomNumber(0, enemyTypesToSpawn.Length);
             }
 
-            GameObject enemyGO = Instantiate(enemyTypesToSpawn[randomEnemyIndex], transform);
-            MoveEnemyToRandomSpawn(enemyGO.transform);
+            // ---------- Multiplayer ------------
+            if (PhotonNetwork.IsMasterClient) {
+                PhotonNetwork.RaiseEvent(ENEMIES_SYNC_TYPE, randomEnemyIndex, new RaiseEventOptions { Receivers = ReceiverGroup.All }, 
+                    SendOptions.SendReliable);
+            }
 
-            Enemy enemy = enemyGO.GetComponent<Enemy>();
-            enemy.enemies = this;
-
-            currentEnemiesSpawned++;
+            //MP_EnemyInstantiation(randomEnemyIndex);
         }
         else {
             // Get the first enemy in the list and move it to a random spawn point.
@@ -160,7 +170,14 @@ public class EnemiesManager : MonoBehaviour {
         Vector3 spawnPos = NavMesh.SamplePosition(allSpawnPoints[randomSpawnIndex].position, out NavMeshHit hit,
             1f, NavMesh.AllAreas) ? hit.position : allSpawnPoints[randomSpawnIndex].position;
 
-        enemy.position = new Vector3(spawnPos.x, enemy.position.y, spawnPos.z);
+        currentEnemyTransform = enemy;
+
+        // ---------- Multiplayer ------------
+        if (PhotonNetwork.IsMasterClient) {
+            //object[] data = new object[] { enemy, spawnPos };
+            PhotonNetwork.RaiseEvent(ENEMIES_SYNC_SPAWN_POS, spawnPos, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+        }
+        //MP_MoveEnemy(enemy, spawnPos);
     }
 
     public void StartEnemyRespawn() {
@@ -184,5 +201,40 @@ public class EnemiesManager : MonoBehaviour {
     public void AddEnemyToPool(Enemy enemy) {
         allEnemiesDisabled.Add(enemy);
         currentEnemiesSpawned--;
+    }
+
+    // ---------------- Multiplayer-Adapted Methods ----------------
+
+    void MP_EnemyInstantiation(int randomEnemyIndex) {
+        GameObject enemyGO = Instantiate(enemyTypesToSpawn[randomEnemyIndex], transform);
+        MoveEnemyToRandomSpawn(enemyGO.transform);
+
+        Enemy enemy = enemyGO.GetComponent<Enemy>();
+        enemy.enemies = this;
+
+        currentEnemiesSpawned++;
+    }
+
+    void MP_MoveEnemy(Transform enemy, Vector3 spawnPos) {
+        enemy.position = new Vector3(spawnPos.x, enemy.position.y, spawnPos.z);
+    }
+
+    void MP_MoveEnemyPatch(Vector3 spawnPos) {
+        currentEnemyTransform.position = new Vector3(spawnPos.x, currentEnemyTransform.position.y, spawnPos.z);
+    }
+
+    public void OnEvent(EventData photonEvent) {
+        // Sync random type selected for instantiation.
+        if (photonEvent.Code == ENEMIES_SYNC_TYPE) {
+            MP_EnemyInstantiation((int) photonEvent.CustomData);
+        }
+
+        // Sync enemy spawn position.
+        if (photonEvent.Code == ENEMIES_SYNC_SPAWN_POS) {
+            //object[] data = (object[]) photonEvent.CustomData;
+            //MP_MoveEnemy((Transform)data[0], (Vector3)data[1]);
+            MP_MoveEnemyPatch((Vector3) photonEvent.CustomData);
+            currentEnemyTransform = null;
+        }
     }
 }

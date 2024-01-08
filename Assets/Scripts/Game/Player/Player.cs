@@ -61,7 +61,7 @@ public class Player : MonoBehaviourPun {
 
         //Transforma a espacio local para que cambie rotacion del personaje y mueve el CharacterController
         _input = transform.TransformDirection(_input);
-        _input.y = 0f;  // Fix the ******* bug when CharacterJokeController collides with rigidbodies.
+        _input.y = 0f;  // Fix the ******* bug when CharacterJokeController collides with rigidbodies. [Dont work]
         controller.Move(_input.normalized * speed * Time.deltaTime);
 
         //Rotacion en el eje Y con el input del raton hacia derecha - izquierda

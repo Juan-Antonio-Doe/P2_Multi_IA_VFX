@@ -1,12 +1,14 @@
+using ExitGames.Client.Photon;
 using Nrjwolf.Tools.AttachAttributes;
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelManager : MonoBehaviour {
+public class LevelManager : MonoBehaviour, IOnEventCallback {
 
     [field: Header("AutoAttach on Editor properties")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] private EnemiesManager enemiesManager { get; set; }    // Manages the enemies.
@@ -37,9 +39,17 @@ public class LevelManager : MonoBehaviour {
     private float width { get; set; } = Screen.width / 2;
     private float height { get; set; } = Screen.height / 2;
 
+    // ---------------- Multiplayer ----------------
+
     private string textBeforeStart { get; set; }
 
+    public const int LEVEL_SYNC_START = 41, LEVEL_SYNC_END = 42;
+
+    private bool afterStart { get; set; }
+
     void Start() {
+        PhotonNetwork.AddCallbackTarget(this);
+
         enemyWaveDurationSecs = enemyWaveDurationMins * 60;
 
         if (PhotonNetwork.IsMasterClient) {
@@ -49,9 +59,11 @@ public class LevelManager : MonoBehaviour {
         }
         else {
             textBeforeStart = $"Máximo de jugadores: <color=clear>{PhotonNetwork.CurrentRoom.PlayerCount}</color>/<color=clear>3</color>\n" +
-                $" - Esperando al anfitrión...";
+                $" - Esperando al anfitrión...\n" +
+                $" - Pulse <b><color=clear>F4</color></b> para salir \n de la partida.";
         }
         
+        afterStart = true;
     }
 
     void Update() {
@@ -66,7 +78,7 @@ public class LevelManager : MonoBehaviour {
         }
 
         if (Input.GetKeyDown(KeyCode.Return) && !isStarted && !isEnded && PhotonNetwork.IsMasterClient) {
-            StartGame();
+            PhotonNetwork.RaiseEvent(LEVEL_SYNC_START, null, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
         }
 
         if (!isStarted)
@@ -85,7 +97,9 @@ public class LevelManager : MonoBehaviour {
             return;
 
         if (currentWave > lastWave) {
-            EndLevel();
+            if (PhotonNetwork.IsMasterClient) {
+                PhotonNetwork.RaiseEvent(LEVEL_SYNC_END, null, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+            }
             if (!gameOverPanel.activeInHierarchy)
                 victoryPanel.SetActive(true);
             return;
@@ -152,17 +166,29 @@ public class LevelManager : MonoBehaviour {
     }
 
     public void GameOver() {
-        EndLevel();
+        if (PhotonNetwork.IsMasterClient) {
+            PhotonNetwork.RaiseEvent(LEVEL_SYNC_END, null, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+        }
         if (!victoryPanel.activeInHierarchy)
             gameOverPanel.SetActive(true);
     }
 
     private void OnGUI() {
-        if (!isStarted && !isEnded) {
+        if (afterStart && !isStarted && !isEnded) {
             GUI.color = Color.red;
             GUI.skin.label.fontSize = 60;
             // Show text on the center of the screen.
             GUI.Label(new Rect(width - 250, height - 25, 1000, 1000), textBeforeStart);
+        }
+    }
+
+    public void OnEvent(EventData photonEvent) {
+        if (photonEvent.Code == LEVEL_SYNC_START) {
+            StartGame();
+        }
+
+        if (photonEvent.Code == LEVEL_SYNC_END) {
+            EndLevel();
         }
     }
 }
