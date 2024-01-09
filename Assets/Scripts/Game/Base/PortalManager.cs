@@ -26,7 +26,7 @@ public class PortalManager : MonoBehaviour {
     void Start() {
         health = maxHealth;
 
-        if (debug) {
+        if (debug || LevelManager.DebugMode) {
             health = maxHealth = 10000;
         }
 

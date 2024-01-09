@@ -31,8 +31,9 @@ public class LevelManager : MonoBehaviour, IOnEventCallback {
     private int currentWave { get; set; } = 0;
     public int CurrentWave { get { return currentWave; } }
 
-
     [field: Header("Debug")]
+    [field: SerializeField] private bool debug { get; set; }
+    public static bool DebugMode { get; private set; }
     [field: SerializeField, ReadOnlyField] public static bool isStarted { get; private set; }
     [field: SerializeField, ReadOnlyField] public static bool isEnded { get; private set; }
 
@@ -46,6 +47,10 @@ public class LevelManager : MonoBehaviour, IOnEventCallback {
     public const int LEVEL_SYNC_START = 41, LEVEL_SYNC_END = 42;
 
     private bool afterStart { get; set; }
+
+    void Awake() {
+        DebugMode = debug;
+    }
 
     void Start() {
         PhotonNetwork.AddCallbackTarget(this);

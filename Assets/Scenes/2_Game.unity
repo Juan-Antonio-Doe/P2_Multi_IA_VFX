@@ -6013,6 +6013,7 @@ MonoBehaviour:
   <enemyWaveDurationMins>k__BackingField: 0.75
   <enemyWaveIntervalSenconds>k__BackingField: 15
   <lastWave>k__BackingField: 60
+  <debug>k__BackingField: 1
 --- !u!114 &2090281658
 MonoBehaviour:
   m_ObjectHideFlags: 0

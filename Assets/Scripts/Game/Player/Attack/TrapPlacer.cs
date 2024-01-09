@@ -1,11 +1,14 @@
+using ExitGames.Client.Photon;
 using Nrjwolf.Tools.AttachAttributes;
+using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TrapPlacer : MonoBehaviour {
+public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
     [field: Header("Autoattach Settings")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] public Camera cam { get; set; }
@@ -24,12 +27,16 @@ public class TrapPlacer : MonoBehaviour {
     private Trap tempTrap { get; set; }
     private int currentTrapIndex { get; set; }
 
+    // ---------------- Multiplayer ----------------
+
+    public const int TRAP_SYNC_INSTANTIATION = 61, TRAP_SYNC_PLACE = 62;
+
     void OnValidate() {
 #if UNITY_EDITOR
         UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
         bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
         bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
-        if (!isValidPrefabStage/* && prefabConnected*/) {
+        if (!isValidPrefabStage && prefabConnected) {
             // Variables that will only be checked when they are in a scene
             if (!Application.isPlaying) {
                 if (revalidateProperties)
@@ -45,6 +52,10 @@ public class TrapPlacer : MonoBehaviour {
             moneyCostText = GameObject.Find("MoneyTrapCostText").GetComponent<Text>();
         }
         revalidateProperties = false;
+    }
+
+    void Start() {
+        PhotonNetwork.AddCallbackTarget(this);
     }
 
     void Update() {
@@ -82,7 +93,9 @@ public class TrapPlacer : MonoBehaviour {
             {
                 if (Input.GetKeyDown(placeTrapKey)) //Usando la key de colocar trampa, ponemos la trampa en el suelo
                 {
+                    // Here call event for place trap
                     PlaceTrap();
+                    PhotonNetwork.RaiseEvent(TRAP_SYNC_PLACE, null, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
                     tempTrap = null;
                 }
             }
@@ -94,7 +107,9 @@ public class TrapPlacer : MonoBehaviour {
         {
             //Si NO existe la trampla placeholder, la instancia para entrar al modo de colocar trampa y poder ver donde se colocara
             case true:
-                tempTrap = Instantiate(trapPrefabs[currentTrapIndex], trapPrefabs[currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
+                //InstantiateTrap(currentTrapIndex);
+                PhotonNetwork.RaiseEvent(TRAP_SYNC_INSTANTIATION, currentTrapIndex, new RaiseEventOptions { Receivers = ReceiverGroup.All }, 
+                    SendOptions.SendReliable);
                 break;
             //Si SI existe la trampla placeholder, la destruye para salir del modo colocar trampa
             case false:
@@ -110,9 +125,13 @@ public class TrapPlacer : MonoBehaviour {
             playerManager.ChangeMoney(-tempTrap.MoneyCost);
             tempTrap.Place();
         }
+        // AJUSTAR ESTE MÉTODO PARA RECIBIR LA POSICIÓN CUANDO SE USA ONLINE
     }
 
     bool CanPlaceMoneyTrap() {
+        if (LevelManager.DebugMode)
+            return true;
+
         if (playerManager.Money >= tempTrap.MoneyCost) {
             tempTrap.SetHoloMatColor(Color.green);
             return true;
@@ -172,7 +191,14 @@ public class TrapPlacer : MonoBehaviour {
             }
         }
         Destroy(tempTrap.gameObject);
-        tempTrap = Instantiate(trapPrefabs[currentTrapIndex], trapPrefabs[currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
+        //InstantiateTrap(currentTrapIndex);
+        PhotonNetwork.RaiseEvent(TRAP_SYNC_INSTANTIATION, currentTrapIndex, new RaiseEventOptions { Receivers = ReceiverGroup.All },
+            SendOptions.SendReliable);
+    }
+
+    // ---------------- Multiplayer-Adapted Methods ----------------
+    private void InstantiateTrap(int _currentTrapIndex) {
+        tempTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
     }
 
     private void OnDrawGizmos() {
@@ -182,6 +208,18 @@ public class TrapPlacer : MonoBehaviour {
             Gizmos.DrawRay(transform.position, transform.forward * 1.9f);
             Gizmos.color = Color.cyan;
             Gizmos.DrawRay(transform.position, transform.forward * 2.5f);
+        }
+    }
+
+    public void OnEvent(EventData photonEvent) {
+        if (photonEvent.Code == TRAP_SYNC_INSTANTIATION) {
+            //if (!playerManager.photonView.IsMine)
+                InstantiateTrap((int)photonEvent.CustomData);
+        }
+
+        if (photonEvent.Code == TRAP_SYNC_PLACE) {
+            if (!playerManager.photonView.IsMine)
+                PlaceTrap();
         }
     }
 }
