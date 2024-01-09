@@ -31,6 +31,8 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
     public const int TRAP_SYNC_INSTANTIATION = 61, TRAP_SYNC_PLACE = 62;
 
+    private string debugText { get; set; }
+
     void OnValidate() {
 #if UNITY_EDITOR
         UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
@@ -72,6 +74,8 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
         //Cambiamos al modo de colocar trampas
         if (Input.GetKeyDown(enterTrapModeKey)) {
             TryPlaceTrap();
+            Debug.Log($"I am: {playerManager.photonView.Owner.NickName}");
+            debugText = $"I am: {playerManager.photonView.Owner.NickName}";
         }
 
         //Cuando la trampa temporal no es null, significa que estamos intentando colocar una trampa
@@ -94,8 +98,9 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
                 if (Input.GetKeyDown(placeTrapKey)) //Usando la key de colocar trampa, ponemos la trampa en el suelo
                 {
                     // Here call event for place trap
-                    PlaceTrap();
-                    PhotonNetwork.RaiseEvent(TRAP_SYNC_PLACE, null, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
+                    PlaceTrap(Vector3.zero);
+                    PhotonNetwork.RaiseEvent(TRAP_SYNC_PLACE, tempTrap.transform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, 
+                        SendOptions.SendReliable);
                     tempTrap = null;
                 }
             }
@@ -118,12 +123,19 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
         }
     }
 
-    void PlaceTrap() {
+    void PlaceTrap(Vector3 placePos) {
         //Marcamos la trampa como colocada si no lo estaba aun
         if (tempTrap.IsPlaced == false) {
-            tempTrap.owner = playerManager;
-            playerManager.ChangeMoney(-tempTrap.MoneyCost);
-            tempTrap.Place();
+            if (playerManager.photonView.IsMine) {
+                playerManager.ChangeMoney(-tempTrap.MoneyCost);
+                tempTrap.owner = playerManager;
+                tempTrap.Place();
+            }
+            else {
+                tempTrap.owner = playerManager;
+                tempTrap.transform.position = placePos;
+                tempTrap.Place();
+            }
         }
         // AJUSTAR ESTE MÉTODO PARA RECIBIR LA POSICIÓN CUANDO SE USA ONLINE
     }
@@ -162,7 +174,14 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
     //Calcula y devuelve la posicion del suelo en la que hay que mover la trampa para mostrar donde se colocaria
     Vector3 GetRoundedCenterGroundPos(float _yPos) {
         Vector3 _roundedPos = Vector3.zero;
-        Ray _ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, cam.nearClipPlane));
+        Ray _ray;
+        if (playerManager.photonView.IsMine) {
+            _ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, cam.nearClipPlane));
+        }
+        else {
+            _ray = new Ray(transform.position, transform.forward);
+        }
+        
         Debug.DrawRay(_ray.origin, _ray.direction * rayLength, Color.red);
         Debug.DrawRay(_ray.origin + _ray.direction * rayLength, Vector3.down * 5f, Color.red);
         if (Physics.Raycast(_ray.origin, _ray.direction, out RaycastHit _hit, rayLength)) {
@@ -219,7 +238,7 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
         if (photonEvent.Code == TRAP_SYNC_PLACE) {
             if (!playerManager.photonView.IsMine)
-                PlaceTrap();
+                PlaceTrap((Vector3)photonEvent.CustomData);
         }
     }
 }
