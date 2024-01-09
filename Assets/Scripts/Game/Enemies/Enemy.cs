@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public abstract class Enemy : MonoBehaviour {
@@ -11,6 +12,8 @@ public abstract class Enemy : MonoBehaviour {
     [field: SerializeField, FindObjectOfType, ReadOnlyField] public EnemiesManager enemies { get; set; }
     [field: SerializeField, GetComponent, ReadOnlyField] protected Rigidbody rb { get; set; }
     public Rigidbody Rb { get { return rb; } }
+    [field: SerializeField, GetComponent, ReadOnlyField] protected NavMeshAgent agent { get; set; }
+    public NavMeshAgent Agent { get { return agent; } }
     [field: SerializeField, GetComponent, ReadOnlyField] public MultiplayerID multiplayerID { get; private set; }
     [field: SerializeField] protected float maxHealth { get; set; } = 20f;
     [field: SerializeField, ReadOnlyField] protected float health { get; set; } = 20f;

@@ -194,4 +194,9 @@ public class LevelManager : MonoBehaviour, IOnEventCallback {
             EndLevel();
         }
     }
+
+    private void OnDestroy() {
+        if (gameObject == null) // Error when exiting the game.
+            return;
+    }
 }

@@ -15,7 +15,8 @@ public class EnemyMovingToPlayerBaseState : EnemyState {
 
         CheckersOnUpdate();
 
-        agent.SetDestination(enemy.enemies.PlayerBase.position);
+        if (agent.enabled)
+            agent.SetDestination(enemy.enemies.PlayerBase.position);
     }
 
     public override void Exit() {

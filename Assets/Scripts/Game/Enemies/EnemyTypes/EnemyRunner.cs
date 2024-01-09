@@ -9,7 +9,6 @@ using UnityEngine.UI;
 public class EnemyRunner : Enemy {
 
     [field: Header("Autoattach properties")]
-    [field: SerializeField, GetComponent, ReadOnlyField] protected NavMeshAgent agent { get; set; }
     [field: SerializeField] private bool revalidateProperties { get; set; } = false;
 
     private EnemyState currentState { get; set; }

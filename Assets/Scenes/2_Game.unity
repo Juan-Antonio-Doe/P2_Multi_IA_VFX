@@ -418,7 +418,7 @@ Transform:
   m_GameObject: {fileID: 115616608}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.70710707, z: -0, w: 0.70710653}
-  m_LocalPosition: {x: -3.75, y: 0, z: 75.25}
+  m_LocalPosition: {x: -8, y: 0, z: 75.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1553,7 +1553,7 @@ Transform:
   m_GameObject: {fileID: 339495441}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 2.5, y: 0, z: 75.5}
+  m_LocalPosition: {x: -3, y: 0, z: 75.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2733,7 +2733,7 @@ Transform:
   m_GameObject: {fileID: 912112845}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 3.75, y: 0, z: 75.25}
+  m_LocalPosition: {x: 8, y: 0, z: 75.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4618,7 +4618,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  <debug>k__BackingField: 1
+  <debug>k__BackingField: 0
 --- !u!1001 &1681623377
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6010,7 +6010,7 @@ MonoBehaviour:
   <waveText>k__BackingField: {fileID: 1364569545}
   <victoryPanel>k__BackingField: {fileID: 143067725}
   <gameOverPanel>k__BackingField: {fileID: 863069493}
-  <enemyWaveDurationMins>k__BackingField: 0.15
+  <enemyWaveDurationMins>k__BackingField: 0.75
   <enemyWaveIntervalSenconds>k__BackingField: 15
   <lastWave>k__BackingField: 60
 --- !u!114 &2090281658

@@ -153,6 +153,7 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
             // Get the first enemy in the list and move it to a random spawn point.
             Enemy enemy = allEnemiesDisabled[0];
             allEnemiesDisabled.RemoveAt(0);
+            enemy.Agent.enabled = false;
             if (PhotonNetwork.IsMasterClient) {
                 MoveEnemyToRandomSpawn(enemy);
             }
@@ -168,6 +169,9 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
 
         Vector3 spawnPos = NavMesh.SamplePosition(allSpawnPoints[randomSpawnIndex].position, out NavMeshHit hit,
             1f, NavMesh.AllAreas) ? hit.position : allSpawnPoints[randomSpawnIndex].position;
+
+        if (randomSpawnIndex > 1)
+            Debug.Log($"Enemy {enemy.name} has indexSpawn: {randomSpawnIndex}");
 
         /*currentEnemyTransform = null;
         currentEnemyTransform = enemy;*/
@@ -228,9 +232,15 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
 
     void MP_MoveEnemyPatch(int enemyID, Vector3 spawnPos) {
         //currentEnemyTransform.position = new Vector3(spawnPos.x, currentEnemyTransform.position.y, spawnPos.z);
-        allEnemiesListIstantiated[enemyID].transform.position = new Vector3(spawnPos.x, 0f, spawnPos.z);
 
-        Debug.Log($"Enemy {allEnemiesListIstantiated[enemyID].name} moved to {spawnPos}");
+        Enemy enemy = allEnemiesListIstantiated[enemyID];
+        enemy.Rb.isKinematic = true;
+        enemy.Agent.enabled = false;
+        enemy.transform.position = new Vector3(spawnPos.x, 0f, spawnPos.z);
+        enemy.Rb.isKinematic = false;
+        enemy.Agent.enabled = true;
+
+        //Debug.Log($"Enemy {allEnemiesListIstantiated[enemyID].name} moved to {spawnPos}");
     }
 
     public void OnEvent(EventData photonEvent) {

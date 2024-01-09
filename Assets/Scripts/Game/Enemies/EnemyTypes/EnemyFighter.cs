@@ -9,7 +9,6 @@ using UnityEngine.UI;
 public class EnemyFighter : Enemy {
 
     [field: Header("Autoattach properties")]
-    [field: SerializeField, GetComponent, ReadOnlyField] protected NavMeshAgent agent { get; set; }
     [field: SerializeField] private bool revalidateProperties { get; set; } = false;
 
     [field: Header("Attack settings")]
@@ -199,7 +198,7 @@ public class EnemyFighter : Enemy {
     }
 
     public void ResetEnemy2() {
-        agent.enabled = true;
+        //agent.enabled = true;
         currentState?.ChangeState(new EnemyMovingToPlayerBaseState(this, agent));
     }
 }

@@ -13,6 +13,7 @@ public class EnemyDeadState : EnemyState {
         base.Enter();
 
         inDeadState = true;
+        agent.ResetPath();
         agent.enabled = false;
 
         if (!enemy.Rb.isKinematic)
@@ -40,7 +41,7 @@ public class EnemyDeadState : EnemyState {
             enemy.Rb.angularVelocity = Vector3.zero;
         }
 
-        agent.enabled = true;
-        agent.ResetPath();
+        /*agent.enabled = true;
+        agent.ResetPath();*/
     }
 }
