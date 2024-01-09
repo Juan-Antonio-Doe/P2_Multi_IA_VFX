@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class TrapPlacer : MonoBehaviour, IOnEventCallback {
@@ -29,7 +30,9 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
     // ---------------- Multiplayer ----------------
 
-    public const int TRAP_SYNC_INSTANTIATION = 61, TRAP_SYNC_PLACE = 62;
+    public const int TRAP_SYNC_INSTANTIATION = 61, TRAP_SYNC_PLACE = 62, TRAP_SYNC_DESTRUCTION = 63;
+
+    private Trap remoteTrap { get; set; }
 
     private string debugText { get; set; }
 
@@ -64,8 +67,8 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
         if (!LevelManager.isStarted)
             return;
 
-        if (!playerManager.photonView.IsMine)
-            return;
+        /*if (!playerManager.photonView.IsMine)
+            return;*/
 
         // Mostramos el coste de la trampa temporal en el texto junto con el nombre de la trampa acortando el texto "(Clone)"
         if (moneyCostText != null)
@@ -73,35 +76,39 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
         //Cambiamos al modo de colocar trampas
         if (Input.GetKeyDown(enterTrapModeKey)) {
-            TryPlaceTrap();
+            if (playerManager.photonView.IsMine)
+                TryPlaceTrap();
+
             Debug.Log($"I am: {playerManager.photonView.Owner.NickName}");
             debugText = $"I am: {playerManager.photonView.Owner.NickName}";
         }
 
-        //Cuando la trampa temporal no es null, significa que estamos intentando colocar una trampa
-        if (tempTrap != null) {
-            // Switch trap with mouse wheel
-            if (Input.GetAxis("Mouse ScrollWheel") > 0f) // forward
-            {
-                SwichTrap(true);
-            }
-            else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // backwards
-            {
-                SwichTrap(false);
-            }
-
-            //Movemos la trampa placeholder a la posicion del suelo en la que se colocaria
-            tempTrap.transform.position = GetRoundedCenterGroundPos(tempTrap.transform.position.y);
-
-            if (CanPlaceGroundTrap() == true)   //Si podemos colocar la trampa porque no hay ningun osbtaculo u otra trampa colocada...
-            {
-                if (Input.GetKeyDown(placeTrapKey)) //Usando la key de colocar trampa, ponemos la trampa en el suelo
+        if(playerManager.photonView.IsMine) {
+            //Cuando la trampa temporal no es null, significa que estamos intentando colocar una trampa
+            if (tempTrap != null) {
+                // Switch trap with mouse wheel
+                if (Input.GetAxis("Mouse ScrollWheel") > 0f) // forward
                 {
-                    // Here call event for place trap
-                    PlaceTrap(Vector3.zero);
-                    PhotonNetwork.RaiseEvent(TRAP_SYNC_PLACE, tempTrap.transform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, 
-                        SendOptions.SendReliable);
-                    tempTrap = null;
+                    SwichTrap(true);
+                }
+                else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // backwards
+                {
+                    SwichTrap(false);
+                }
+
+                //Movemos la trampa placeholder a la posicion del suelo en la que se colocaria
+                tempTrap.transform.position = GetRoundedCenterGroundPos(tempTrap.transform.position.y);
+
+                if (CanPlaceGroundTrap() == true)   //Si podemos colocar la trampa porque no hay ningun osbtaculo u otra trampa colocada...
+                {
+                    if (Input.GetKeyDown(placeTrapKey)) //Usando la key de colocar trampa, ponemos la trampa en el suelo
+                    {
+                        // Here call event for place trap
+                        PlaceTrap(Vector3.zero);
+                        PhotonNetwork.RaiseEvent(TRAP_SYNC_PLACE, tempTrap.transform.position, new RaiseEventOptions { Receivers = ReceiverGroup.Others },
+                            SendOptions.SendReliable);
+                        tempTrap = null;
+                    }
                 }
             }
         }
@@ -119,25 +126,30 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
             //Si SI existe la trampla placeholder, la destruye para salir del modo colocar trampa
             case false:
                 Destroy(tempTrap.gameObject);
+                PhotonNetwork.RaiseEvent(TRAP_SYNC_DESTRUCTION, null, new RaiseEventOptions { Receivers = ReceiverGroup.All },
+                               SendOptions.SendReliable);
                 break;
         }
     }
 
     void PlaceTrap(Vector3 placePos) {
         //Marcamos la trampa como colocada si no lo estaba aun
-        if (tempTrap.IsPlaced == false) {
+        if (tempTrap != null && tempTrap.IsPlaced == false) {
             if (playerManager.photonView.IsMine) {
                 playerManager.ChangeMoney(-tempTrap.MoneyCost);
                 tempTrap.owner = playerManager;
                 tempTrap.Place();
-            }
-            else {
-                tempTrap.owner = playerManager;
-                tempTrap.transform.position = placePos;
-                tempTrap.Place();
+                tempTrap = null;
             }
         }
-        // AJUSTAR ESTE MÉTODO PARA RECIBIR LA POSICIÓN CUANDO SE USA ONLINE
+        if (remoteTrap != null && !remoteTrap.IsPlaced) {
+            if (!playerManager.photonView.IsMine) {
+                remoteTrap.owner = playerManager;
+                remoteTrap.transform.position = placePos;
+                remoteTrap.Place();
+                remoteTrap = null;
+            }
+        }
     }
 
     bool CanPlaceMoneyTrap() {
@@ -210,6 +222,9 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
             }
         }
         Destroy(tempTrap.gameObject);
+        PhotonNetwork.RaiseEvent(TRAP_SYNC_DESTRUCTION, null, new RaiseEventOptions { Receivers = ReceiverGroup.All },
+                       SendOptions.SendReliable);
+
         //InstantiateTrap(currentTrapIndex);
         PhotonNetwork.RaiseEvent(TRAP_SYNC_INSTANTIATION, currentTrapIndex, new RaiseEventOptions { Receivers = ReceiverGroup.All },
             SendOptions.SendReliable);
@@ -217,7 +232,15 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
 
     // ---------------- Multiplayer-Adapted Methods ----------------
     private void InstantiateTrap(int _currentTrapIndex) {
-        tempTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
+        //tempTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
+        
+        Trap auxTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity);
+        if (playerManager.photonView.IsMine) {
+            tempTrap = auxTrap;
+        }
+        else {
+            remoteTrap = auxTrap;
+        }
     }
 
     private void OnDrawGizmos() {
@@ -239,6 +262,12 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
         if (photonEvent.Code == TRAP_SYNC_PLACE) {
             if (!playerManager.photonView.IsMine)
                 PlaceTrap((Vector3)photonEvent.CustomData);
+        }
+
+        if (photonEvent.Code == TRAP_SYNC_DESTRUCTION) {
+            if (!playerManager.photonView.IsMine)
+                if (remoteTrap != null)
+                    Destroy(remoteTrap.gameObject);
         }
     }
 }
