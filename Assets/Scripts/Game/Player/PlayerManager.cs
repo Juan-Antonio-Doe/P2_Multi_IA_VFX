@@ -115,9 +115,9 @@ public class PlayerManager : MonoBehaviourPun, IPunObservable {
                 Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
             }
         }
-        else {
+        /*else {
             SyncOtherPlayers();
-        }
+        }*/
 
         // Fix the ******* bug when CharacterJokeController collides with rigidbodies. May produce camera rotation bug.
         //transform.position = new Vector3(transform.position.x, 0, transform.position.z);
@@ -257,7 +257,7 @@ public class PlayerManager : MonoBehaviourPun, IPunObservable {
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info) {
-        if (stream.IsWriting) {
+        /*if (stream.IsWriting) {
             // Enviamos la posición y la rotación del jugador.
             stream.SendNext(transform.position);
             stream.SendNext(transform.rotation);
@@ -266,7 +266,7 @@ public class PlayerManager : MonoBehaviourPun, IPunObservable {
             // Recibimos la posición y la rotación del jugador.
             networkPos = (Vector3)stream.ReceiveNext();
             networkRot = (Quaternion)stream.ReceiveNext();
-        }
+        }*/
     }
 
     IEnumerator LateComponentsCo() {
