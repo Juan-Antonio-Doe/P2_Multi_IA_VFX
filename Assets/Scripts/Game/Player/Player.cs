@@ -20,6 +20,7 @@ public class Player : MonoBehaviourPun {
     [field: SerializeField] private Transform shootOrigin { get; set; }
     [field: SerializeField] private Projectile projectilePrefab { get; set; }
     [field: SerializeField] private float shootRate { get; set; } = 3;
+    [field: SerializeField] private ParticleSystem muzzleFlash { get; set; }
 
     private float xRot { get; set; } = 0f;
     private float shootTimer { get; set; } = 0f;
@@ -77,6 +78,9 @@ public class Player : MonoBehaviourPun {
         if (Input.GetMouseButton(0) && Time.time >= shootTimer) {
             //Reiniciamos el timer de disparo
             shootTimer = Time.time + (1f / shootRate);
+
+            //Ejecutamos el efecto de particulas de disparo
+            muzzleFlash.Play();
 
             //Calculamos y lanzamos un rayo desde la camara hacia el centro de la pantalla
             Ray _ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, cam.nearClipPlane));

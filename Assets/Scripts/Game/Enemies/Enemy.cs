@@ -8,6 +8,11 @@ using UnityEngine.UI;
 
 public abstract class Enemy : MonoBehaviour {
 
+    public enum EnemyType {
+        Runner,
+        Fighter
+    }
+
     [field: Header("Enemy settings")]
     [field: SerializeField, FindObjectOfType, ReadOnlyField] public EnemiesManager enemies { get; set; }
     [field: SerializeField, GetComponent, ReadOnlyField] protected Rigidbody rb { get; set; }
@@ -15,6 +20,7 @@ public abstract class Enemy : MonoBehaviour {
     [field: SerializeField, GetComponent, ReadOnlyField] protected NavMeshAgent agent { get; set; }
     public NavMeshAgent Agent { get { return agent; } }
     [field: SerializeField, GetComponent, ReadOnlyField] public MultiplayerID multiplayerID { get; private set; }
+    [field: SerializeField] public EnemyType enemyType { get; private set; }
     [field: SerializeField] protected float maxHealth { get; set; } = 20f;
     [field: SerializeField, ReadOnlyField] protected float health { get; set; } = 20f;
     [field: SerializeField] protected float damageReceivedByPlayer { get; set; } = 5f;

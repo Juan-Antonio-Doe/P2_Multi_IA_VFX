@@ -216,7 +216,7 @@ public class TrapPlacer : MonoBehaviour, IOnEventCallback {
     private void InstantiateTrap(int _currentTrapIndex, bool remote=false) {
         //tempTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity)/*.GetComponent<Trap>()*/;
         
-        Trap auxTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, Quaternion.identity);
+        Trap auxTrap = Instantiate(trapPrefabs[_currentTrapIndex], trapPrefabs[_currentTrapIndex].transform.position, trapPrefabs[_currentTrapIndex].transform.rotation);
         if (!remote) {
             if (tempTrap != null)
                 Destroy(tempTrap.gameObject);

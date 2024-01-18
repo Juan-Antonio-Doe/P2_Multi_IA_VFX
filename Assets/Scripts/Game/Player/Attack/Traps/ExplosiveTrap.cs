@@ -8,6 +8,7 @@ public class ExplosiveTrap : Trap {
     [field: Header("Explosion Trap Settings")]
     [field: SerializeField] private LayerMask enemyLayer { get; set; } = 1 << 11;
     [field: SerializeField] private float explosionRadius { get; set; } = 3f;
+    [field: SerializeField] private GameObject explosionVFXPrefab { get; set; }
 
     private bool detonated { get; set; }
 
@@ -29,6 +30,7 @@ public class ExplosiveTrap : Trap {
             yield return null;
         }
 
+        Instantiate(explosionVFXPrefab, transform.position, explosionVFXPrefab.transform.rotation);
         Destroy(this.gameObject);
     }
 
@@ -37,11 +39,6 @@ public class ExplosiveTrap : Trap {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
-    }
-
-    private void OnDrawGizmosSelected() {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 
     private void OnDestroy() {

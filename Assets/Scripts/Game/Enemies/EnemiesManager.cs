@@ -237,7 +237,12 @@ public class EnemiesManager : MonoBehaviour, IOnEventCallback {
         enemy.Rb.isKinematic = true;
         enemy.Agent.enabled = false;
         enemy.transform.position = new Vector3(spawnPos.x, 0f, spawnPos.z);
-        enemy.Rb.isKinematic = false;
+
+        if (enemy.enemyType == Enemy.EnemyType.Runner)
+            enemy.Rb.isKinematic = true;
+        else
+            enemy.Rb.isKinematic = false;
+
         enemy.Agent.enabled = true;
 
         //Debug.Log($"Enemy {allEnemiesListIstantiated[enemyID].name} moved to {spawnPos}");

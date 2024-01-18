@@ -152,6 +152,7 @@ public class EnemyRunner : Enemy {
 
     public void ResetEnemy2() {
         agent.enabled = true;
+        rb.isKinematic = true;
         currentState?.ChangeState(new EnemyMovingToPlayerBaseState(this, agent));
     }
 

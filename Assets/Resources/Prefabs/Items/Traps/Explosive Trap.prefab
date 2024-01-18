@@ -28,13 +28,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3466667000637119667}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: 0.70710677, w: 0.7071068}
   m_LocalPosition: {x: 0, y: -0.95, z: 0}
-  m_LocalScale: {x: 2, y: 0.1, z: 2}
+  m_LocalScale: {x: 0.1, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!114 &6016794410777814019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <rend>k__BackingField: {fileID: 3466667000637119665}
-  <holoMat>k__BackingField: {fileID: 2100000, guid: 31c69e1474ec19647b1bc38c8e45c875,
+  <holoMat>k__BackingField: {fileID: 2100000, guid: 39f085ed2a58b284a84b5e624a5c7f96,
     type: 2}
   <moneyCost>k__BackingField: 1000
   <isPlaced>k__BackingField: 0
@@ -57,6 +57,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   <explosionRadius>k__BackingField: 4
+  <explosionVFXPrefab>k__BackingField: {fileID: 5072818536805880157, guid: de158462b5a8f4144af234a483745a0e,
+    type: 3}
 --- !u!33 &3466667000637119630
 MeshFilter:
   m_ObjectHideFlags: 0

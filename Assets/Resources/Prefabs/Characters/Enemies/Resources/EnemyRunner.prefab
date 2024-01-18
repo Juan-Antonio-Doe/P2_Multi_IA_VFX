@@ -54,7 +54,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <enemies>k__BackingField: {fileID: 0}
   <rb>k__BackingField: {fileID: 5461107012159944273}
+  <agent>k__BackingField: {fileID: 2764570005286273631}
   <multiplayerID>k__BackingField: {fileID: 6309339522248814874}
+  <enemyType>k__BackingField: 0
   <maxHealth>k__BackingField: 20
   <health>k__BackingField: 20
   <damageReceivedByPlayer>k__BackingField: 5
@@ -67,7 +69,6 @@ MonoBehaviour:
   <attackCooldown>k__BackingField: 0
   <moveSpeed>k__BackingField: 4
   <attackTarget>k__BackingField: {fileID: 0}
-  <agent>k__BackingField: {fileID: 2764570005286273631}
   <revalidateProperties>k__BackingField: 0
 --- !u!114 &6309339522248814874
 MonoBehaviour:
